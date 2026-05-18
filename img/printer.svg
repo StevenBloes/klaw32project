@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg
+  width="115mm"
+  height="100mm"
+  viewBox="0 0 115 100"
+  version="1.1"
+  id="printer_svg"
+  xmlns="http://www.w3.org/2000/svg">
+
+  <style>
+    .body { fill:#404040; stroke:#3f3f3f; }
+    .white-fill { fill:#ffffff; stroke:#3f3f3f; }
+    .paper-line { stroke:#3f3f3f; stroke-width:2.2; stroke-linecap:round; }
+    .paper-outline { fill:#ffffff; stroke:#3f3f3f; stroke-width:2; }
+    .fold-line { fill:#ffffff; stroke:#3f3f3f; stroke-linecap:round; stroke-linejoin:round; }
+    .power-btn { fill:none; stroke:#ffffff; stroke-width:2.5; }
+  </style>
+
+  <g id="printer">
+
+    <!-- Printer body -->
+    <rect id="body_bottom"
+      class="body"
+      x="4.8" y="26.8"
+      width="104.7" height="49.7" rx="11.2"
+      stroke-width="0.25" />
+
+    <rect id="body_top"
+      class="body"
+      x="29.8458" y="16.856"
+      width="54.766" height="14.766" rx="2.372"
+      stroke-width="0.25" />
+
+    <circle id="power_button"
+      class="power-btn"
+      cx="98.7" cy="38.7" r="2" />
+
+    <rect id="top_opening"
+      class="white-fill"
+      x="32.2" y="49.8"
+      width="49.8" height="4.8" rx="0.4"
+      stroke-width="0.131" />
+
+    <rect id="lower_opening"
+      class="white-fill"
+      x="32.2" y="56.8"
+      width="49.8" height="4.8" rx="0.4"
+      stroke-width="0.131" />
+
+    <!-- New paper -->
+    <path id="new_paper"
+      class="fold-line"
+      d="M36.7288 27.6071V5.739h33l8 9v13.0772z"
+      stroke-width="1.828" />
+
+    <path id="new-paper_fold"
+      class="fold-line"
+      d="M68.4404 6.7261v9.0257h8.1767"
+      stroke-width="1.823" />
+
+    <!-- Printed paper -->
+    <rect id="printed_paper"
+      class="paper-outline"
+      x="36.5" y="55.7"
+      width="41.3" height="38.3" rx="0.5" />
+
+    <line id="printed_paper_line_1"
+      class="paper-line"
+      x1="41.5" y1="62.5" x2="72.5" y2="62.5" />
+
+    <line id="printed_paper_line_2"
+      class="paper-line"
+      x1="41.5" y1="70.5" x2="72.5" y2="70.5" />
+
+    <line id="printed_paper_first_line_3"
+      class="paper-line"
+      x1="41.5" y1="78.5" x2="72.5" y2="78.5" />
+
+    <line id="printed_paper_first_line_4"
+      class="paper-line"
+      x1="41.5" y1="86.5" x2="60.5" y2="86.5" />
+  </g>
+</svg>

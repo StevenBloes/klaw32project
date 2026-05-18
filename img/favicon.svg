@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+  width="780" 
+  height="780" 
+  viewBox="0 0 780 781">
+  <!--Patch box-->
+  <rect x="275" y="380" width="40" height="20" fill="#4ea13f" stroke="#4ea13f" stroke-width="1"/>
+  <!--Left box-->
+  <rect x="0" y="20" width="290" height="740" fill="#4ea13f" stroke="#4ea13f" stroke-width="1"/>
+  <!--Top leaf-->
+  <path d="M 280 390 C 250 50, 551 19, 740 0 C 720 480, 340 380, 280 390" stroke="#4ea13f" fill="#4ea13f"/>
+  <!--Bottom leaf-->
+  <path d="M 280 390 C 250 720, 551 761, 740 780 C 720 300, 340 400, 280 390" stroke="#4ea13f" fill="#4ea13f"/>
+</svg>
