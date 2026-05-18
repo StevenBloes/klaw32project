@@ -1,0 +1,223 @@
+:root {
+	--hover-border-color: #AACCAA;
+}
+
+#ui-datepicker-div {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 9999 !important;
+}
+
+.table_container {
+	border-radius: 10px;
+	border: solid 1px #AAAAAA;
+	overflow: auto;
+	box-shadow: 0.1em 0.1em 0.6em #AAAAAAAA;
+	width: 100%;
+	max-height: 98%;
+}
+
+.view {
+	/*display: flex;*/
+	height: 94vh;
+	padding: 1em 0.01em;
+}
+
+.banner {
+	display: flex;
+	margin-bottom: 6px;
+	flex-wrap: nowrap;
+	gap: 2px;
+	font-size: 1.7em;
+	overflow: visible;
+}
+
+.banner_button {
+	background-color: #AFA;
+	width: 1.5em;
+	max-height: 1.5em;
+	font-size: 1em;
+	font-weight: 800;
+	border-radius: 10px;
+	border: solid 1px #AAAAAA;
+	box-shadow: 0.07em 0.07em 0.1em #AAAAAAAA;
+	cursor: pointer;
+}
+
+.banner_button:hover {
+	background-color: #9E9;
+}
+
+.banner_label {
+	flex-grow: 1;
+	background-color: #AFA;
+	border-radius: 10px;
+	border: solid 1px #AAAAAA;
+	max-height: 1.5em;
+	font-size: 1em;
+	font-weight: 800;
+	text-align: center;
+	box-shadow: 0.07em 0.07em 0.1em #AAAAAAAA;
+}
+
+.drop_button {
+	position: relative;
+	overflow: visible;
+}
+
+.drop_panel {
+	display: flex;
+    flex-direction: column;
+	position: absolute;
+	padding: 0.1em 0.1em 0.1em 0.2em;
+	gap: 0.05em;
+	left: 0;
+	top: 110%;
+	z-index: 10;
+	border-radius: 10px;
+	border-top-left-radius: 0px;
+	border: solid 1px #0001;
+	box-shadow: 0.07em 0.07em 0.1em #AAAAAAAA;
+	color: #000E;
+	background-color: #AEE;
+	opacity: 0;
+	transform-origin: top;
+    transform: translateY(-10px);
+    transition: opacity 0.4s ease, transform 0.3s ease;
+	transform: scaleY(0);
+	overflow: hidden;
+}
+
+.drop_item {
+	font-size: 0.7em;
+	border-radius: 10px;
+	border-top-left-radius: 0px;
+	padding: 0.25em 1em 0.25em 0.25em;
+	text-wrap: nowrap;	
+}
+
+.drop_item:hover {
+	background-color: #0001;
+	text-decoration-line: underline;
+	text-decoration-style: solid;
+	color: #000;
+	box-shadow: 0.07em 0.07em 0.1em #0002;
+}
+
+.drop_button:hover .drop_panel {
+	opacity: 1;
+	transform: scaleY(1);
+}
+
+.tooltip {
+  position: relative;
+  cursor: help;
+  overflow: visible;
+}
+
+.tooltip .tip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  left: 0;
+  top: 120%;
+  background: #333;
+  color: #fff;
+  padding: 8px 10px;
+  border-radius: 4px;
+  width: max-content;
+  max-width: 250px;
+  white-space: normal;
+  transition: opacity 0.2s;
+}
+
+.tooltip:hover .tip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.pulse {
+	background: #AFA;
+	animation: pulseYellow 6s infinite linear;
+}
+
+@keyframes pulseYellow{
+  0%   { filter: hue-rotate(0deg); }
+  10% { background-color: #FF0; }
+  40%  { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(-360deg); }
+}
+
+body {
+	font-family: "Roboto Condensed", sans-serif;
+}
+
+h2 {
+	padding-top: 0em;
+	margin-top: 0em;
+}
+
+table {
+	border-collapse: collapse;
+    width: 100%;
+}
+
+thead {
+	position: sticky;
+	top: 0;
+}
+
+th {
+	background-color: #666666;
+	border: solid 1px #AAAAAA;
+	border-top: none;
+	color: white;
+	padding: 0.1em 0.5em;
+	font-size: clamp(11px, 1vw, 16px);
+	white-space: nowrap;
+}
+
+td {
+	background-color: #FFFFFF00;
+	border: solid 1px #AAAAAA;
+	padding: 0.1em 0.5em;
+	text-align: center;
+	text-overflow: ellipsis;
+	font-size: clamp(11px, 1vw, 16px);
+	/*white-space: nowrap;*/
+}
+
+td:nth-child(1), th:nth-child(1) {
+	border-left: none;
+}
+
+td:last-child, th:last-child {
+	border-right: none;
+}
+
+table tr:last-child td {
+	border-bottom: none;
+}
+
+tr:hover td{
+	/*-webkit-box-shadow:inset 0px 0px 0px 1px #f00;
+	-moz-box-shadow:inset 0px 0px 0px 1px #f00;*/
+	box-shadow: 
+		inset 0px 2px 1px 0px var(--hover-border-color), 
+		inset 0px -2px 1px 0px var(--hover-border-color);
+	cursor: pointer;
+}
+
+tr:hover td:first-child{
+	/*-webkit-box-shadow:inset 0px 0px 0px 1px #f00;
+	-moz-box-shadow:inset 0px 0px 0px 1px #f00;*/
+	box-shadow:inset 2px 0px 1px 2px var(--hover-border-color);
+}
+
+tr:hover td:last-child{
+	/*-webkit-box-shadow:inset 0px 0px 0px 1px #f00;
+	-moz-box-shadow:inset 0px 0px 0px 1px #f00;*/
+	box-shadow:inset -2px 0px 1px 2px var(--hover-border-color);
+}
