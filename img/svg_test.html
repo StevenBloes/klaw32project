@@ -1,0 +1,97 @@
+<svg class='banner_button' title="Verander tabel" width="185mm" height="185mm" viewBox="0 0 185 185" xmlns="http://www.w3.org/2000/svg">
+          <title>Wijzig Modus</title>
+          <style>
+            svg { 
+              transform-origin: 50% 50%; cursor: pointer;
+            }
+            #arrows *, #eye * {
+              stroke: #06460b;
+              transition: stroke 0.3s ease;
+            }
+            @keyframes openIris {
+              0%   { stroke: #06460b; }
+              100% { stroke: #96a69b; stroke-width: 1.0; }
+            }
+            @keyframes closeIris {
+              0%   { stroke: #96a69b; stroke-width: 1.0; }
+              100% { stroke: #06460b; stroke-width: 2; }
+            }
+            @keyframes openEye {
+              0%   { stroke-width: 4; }
+              100% { stroke-width: 3; }
+            }
+            @keyframes closeEye {
+              0%   { stroke-width: 3; }
+              100% { stroke-width: 4; }
+            }
+            @keyframes openPupil {
+              0%   { stroke-width: 4; }
+              100% { stroke-width: 0; }
+            }
+            svg #pupil { 
+              animation: closeEye 0.6s ease forwards; 
+            }
+            svg #iris { 
+              animation: closeIris 0.6s ease forwards; 
+            }
+            svg #outer { 
+              animation: closeEye 0.6s ease forwards; 
+            }
+            svg:hover #eye #pupil { 
+              animation: openPupil 0.6s ease forwards; 
+            }
+            svg:hover #eye #iris { 
+              animation: openIris 0.6s ease forwards; 
+            }
+            svg:hover #eye #outer { 
+              animation: openEye 0.6s ease forwards; 
+            }
+          </style>
+          <g id="layer1" onClick="changeView()">
+            <rect
+              x="0" y="0"
+              width="85" height="85"
+              fill="transparent"
+              pointer-events="all"
+              id="clickArea"
+              />
+            <g id="eye">
+              <path id="outer"
+                d="M17.25 43.30C35.18 19.40 48.63 21.08 66.88 42.63 52.57 63.19 30.51 62.46 17.25 43.30Z"
+                fill="#fff" stroke-width="4.36" stroke-linecap="square" stroke-linejoin="round"/>
+              <ellipse id="iris"
+                cx="42.0" cy="42.0" rx="12.0" ry="12.0"
+                fill="#10a31d" fill-opacity="0.52" stroke-width="2.22"/>
+              <ellipse id="pupil"
+                cx="42.0" cy="42.0" rx="7.50" ry="7.5"
+                fill="#06470b" stroke-width="2.22"/>
+              <ellipse id="light"
+                cx="39.81" cy="39.82" rx="3.0" ry="3.5"
+                fill="#fff" fill-opacity="0.65" stroke-width="2.22"/>
+            </g>
+            <g id="arrows">
+			  <!-- degrees: arrow 1 => 270 -> 120 (head 132) // arrow 2 => 90 -> 300 (head 312) // radius: 32 (head 25-39)-->
+              <path id="arrow_1_tail"
+                d="M 11.9 31.1A 32 32 0 0 1 73.5 36.4"
+                fill="none" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+              <path id="arrow_2_tail"
+                d="M 72.1 52.9A 32 32 0 0 1 10.5 47.6"
+                fill="none" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline id="arrow_1_head"
+                points="20.8 28.8, 11.9 31.1, 8.9 21.3"
+                fill="none" stroke-width="7.29" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline id="arrow_2_head"
+                points="63.2 55.2, 72.1 52.9, 75.1 62.7"
+                fill="none" stroke-width="7.29" stroke-linecap="round" stroke-linejoin="round"/>
+              <animateTransform
+                id="spin"
+                attributeName="transform"
+                type="rotate"
+                from="0 42 42"
+                to="-180 42 42"
+                dur="0.25s"
+                begin="layer1.click"
+                fill="remove"/>
+            </g>
+          </g>
+        </svg>
