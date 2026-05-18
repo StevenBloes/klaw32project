@@ -4,11 +4,13 @@ let currentRoot = null;
 const routes = {
   "#/": { component: "home" },
 
-  "#/products": {
-    component: "products/index",
+  "#/planning": {
+    component: "planning/index",
     children: {
-      "phones": "products/phones",
-      "laptops": "products/laptops"
+      "current": "planning/current",
+      "new": "planning/new",
+      "supplies": "planning/supplies",
+      "history": "planning/history"
     }
   }
 };
