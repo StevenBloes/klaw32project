@@ -1,9 +1,12 @@
 export const title = "KLA W32 - Home";
 
+function createWelcomeText(){
+	return "Welcome";
+}
+
 export function render() {
   return `
-    <h1>Welcome</h1>
-    <p>Select a section:</p>
+    <h1 id="welcome"></h1>
 
     <button id="btnPlanning">Planning</button>
     <button id="btnPhones">Phones</button>
@@ -12,16 +15,18 @@ export function render() {
 }
 
 export function init(root) {
+  root.getElementById("welcome") = createWelcome();
+  
   root.querySelector("#btnPlanning").onclick = () => {
     window.location.hash = "#/planning";
   };
 
   root.querySelector("#btnPhones").onclick = () => {
-    window.location.hash = "#/products/phones";
+    window.location.hash = "#/stock";
   };
 
   root.querySelector("#btnLaptops").onclick = () => {
-    window.location.hash = "#/products/laptops";
+    window.location.hash = "#/";
   };
 }
 
