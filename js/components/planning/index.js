@@ -2,25 +2,12 @@ export const title = "KLA W32 - Productie Planning";
 
 // Global constants
 let date = new Date();
-const banner_label = document.getElementById('banner_label');
-const planning_table = document.getElementById('planning_table');
-const layer = document.querySelector(".tooltip-layer");
 
 const PROD_MODE = 0;
 const RECEP_MODE = 1;
 
 // default the view to the production view
 let view_mode = parseInt(getFromLocalStorage('view_mode') ? getFromLocalStorage('view_mode') : PROD_MODE);
-
-function init() {
-    if (view_mode === RECEP_MODE) {
-        document.getElementById('th_sap').style.display = "table-cell";
-        document.getElementById('th_production').style.display = "table-cell";
-    } else {
-        document.getElementById('th_sap').style.display = "none";
-        document.getElementById('th_production').style.display = "none";
-    }
-}
 
 let isEditing = false;
 let prev_text = "";
@@ -39,93 +26,93 @@ let count = 0;
 *************************************************************************/
 // extract a value
 function getFromLocalStorage(name) {
-    return localStorage.getItem(name);
+  return localStorage.getItem(name);
 }
 
 // set a value
 function saveToLocalStorage(name, value) {
-    localStorage.setItem(name, value);
+  localStorage.setItem(name, value);
 }
 
 // delete a value
 function deleteFromLocalStorage(name) {
-    localStorage.removeItem(name);
+  localStorage.removeItem(name);
 }
 
 
 // change view
 function changeView() {
-    if (view_mode === PROD_MODE) {
-        view_mode = RECEP_MODE;
-        document.getElementById('th_sap').style.display = "table-cell";
-        document.getElementById('th_production').style.display = "table-cell";
-    } else {
-        view_mode = PROD_MODE;
-        document.getElementById('th_sap').style.display = "none";
-        document.getElementById('th_production').style.display = "none";
-    }
+  if (view_mode === PROD_MODE) {
+    view_mode = RECEP_MODE;
+    document.getElementById('th_sap').style.display = "table-cell";
+    document.getElementById('th_production').style.display = "table-cell";
+  } else {
+    view_mode = PROD_MODE;
+    document.getElementById('th_sap').style.display = "none";
+    document.getElementById('th_production').style.display = "none";
+  }
 
-    saveToLocalStorage("view_mode", view_mode);
-    loadPlanning();
+  saveToLocalStorage("view_mode", view_mode);
+  loadPlanning();
 }
 
 // increase date
 function subDay() {
-    date.setUTCDate(date.getDate() - 1);
-    banner_label.innerHTML = "Planning " + date.toISOString().substring(0, 10);
-    loadPlanning();
+  date.setUTCDate(date.getDate() - 1);
+  bannerLabel.innerHTML = "Planning " + date.toISOString().substring(0, 10);
+  loadPlanning();
 }
 
 // decrease date
 function addDay() {
-    date.setUTCDate(date.getDate() + 1);
-    banner_label.innerHTML = "Planning " + date.toISOString().substring(0, 10);
-    loadPlanning();
+  date.setUTCDate(date.getDate() + 1);
+  bannerLabel.innerHTML = "Planning " + date.toISOString().substring(0, 10);
+  loadPlanning();
 }
 
 // select date from a datepicker
 function selectDay() {
-    const picker = document.getElementById("datePicker");
-    picker.showPicker();
-    picker.addEventListener("change", () => {
-        date = new Date(picker.value);
-        banner_label.innerHTML = "Planning " + date.toISOString().substring(0, 10);
-        loadPlanning();
-    });
+  const picker = document.getElementById("datePicker");
+  picker.showPicker();
+  picker.addEventListener("change", () => {
+    date = new Date(picker.value);
+    bannerLabel.innerHTML = "Planning " + date.toISOString().substring(0, 10);
+    loadPlanning();
+  });
 }
 
 // adjust arrival confirmation
 function incrementConfirmation(id, current_value) {
-    let new_value = 0;
-    if (current_value < 2) {
-        new_value = current_value + 1;
-    } else {
-        new_value = 0;
-    }
-    fetch(`http://192.168.28.132:3000/arrconfirm/${id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ new_value })
-    })
-        .then(res => res.json())
-        .then(data => { loadPlanning(); })
-        .catch(err => console.error(err));
+  let new_value = 0;
+  if (current_value < 2) {
+    new_value = current_value + 1;
+  } else {
+    new_value = 0;
+  }
+  fetch(`http://192.168.28.132:3000/arrconfirm/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ new_value })
+  })
+    .then(res => res.json())
+    .then(data => { loadPlanning(); })
+    .catch(err => console.error(err));
 }
 
 // save production code
 function save_production_code(id, new_value) {
-    // add leading zero if not typed and if string is not empty
-    if (!String(new_value).startsWith(0) && String(new_value).trim() !== "") {
-        new_value = "0" + String(new_value).trim();
-    }
-    fetch(`http://192.168.28.132:3000/edit_prod/${id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ new_value })
-    })
-        .then(res => res.json())
-        .then(data => { loadPlanning(); })
-        .catch(err => console.error(err));
+  // add leading zero if not typed and if string is not empty
+  if (!String(new_value).startsWith(0) && String(new_value).trim() !== "") {
+    new_value = "0" + String(new_value).trim();
+  }
+  fetch(`http://192.168.28.132:3000/edit_prod/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ new_value })
+  })
+    .then(res => res.json())
+    .then(data => { loadPlanning(); })
+    .catch(err => console.error(err));
 }
 
 // check time format
@@ -135,33 +122,33 @@ function check_time_format(value) {
 
 // save arrival time
 function save_arrival(id, new_value) {
-    fetch(`http://192.168.28.132:3000/edit_arr/${id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ new_value })
-    })
-        .then(res => res.json())
-        .then(data => { loadPlanning(); })
-        .catch(err => console.error(err));
+  fetch(`http://192.168.28.132:3000/edit_arr/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ new_value })
+  })
+    .then(res => res.json())
+    .then(data => { loadPlanning(); })
+    .catch(err => console.error(err));
 }
 
 // save departure time
 function save_departure(id, new_value) {
-    fetch(`http://192.168.28.132:3000/edit_dep/${id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ new_value })
-    })
-        .then(res => res.json())
-        .then(data => { loadPlanning(); })
-        .catch(err => console.error(err));
+  fetch(`http://192.168.28.132:3000/edit_dep/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ new_value })
+  })
+    .then(res => res.json())
+    .then(data => { loadPlanning(); })
+    .catch(err => console.error(err));
 }
 
 
 
 function getEyeButton() {
-    return `<svg 
-    id='view_mode_button' class='banner_button' title="Verander tabel" width="85mm" height="85mm" viewBox="0 0 85 85" xmlns="http://www.w3.org/2000/svg">
+  return `<svg 
+    id='view-mode-btn' class='banner-btn' title="Verander tabel" width="85mm" height="85mm" viewBox="0 0 85 85" xmlns="http://www.w3.org/2000/svg">
       <title>Wijzig Modus</title>
       <style>
         svg { 
@@ -260,31 +247,75 @@ function getEyeButton() {
       </svg>`
 }
 
-
 export function render() {
-    return `
+  return `
     <div class="view">
-      <div class='banner'>
-        <button class='banner_button' onClick="subDay()" title="Vorige"><</button>
-        <div class='banner_button drop_button' onclick="">&#128437;
-		  <div class='drop_panel'>
-		    <div class='drop_item'>Huidige Planning</div>
-			<div class='drop_item'>Nieuwe Planning</div>
-			<div class='drop_item'>Benodigdheden</div>
-			<div class='drop_item'>Historiek</div>
+      <div class="banner">
+        <button class="banner-btn" id="sub-date-btn" title="Vorige"><</button>
+        <div class="banner-btn drop-btn" onclick="">&#128437;
+		  <div class="drop-panel">
+		    <div class="drop-item">Huidige Planning</div>
+			<div class="drop-item">Nieuwe Planning</div>
+			<div class="drop-item">Benodigdheden</div>
+			<div class="drop-item">Historiek</div>
 		  </div>
 		</div>
-        <div id='banner_label' class='banner_label'>Productie Planning</div>
+        <div id='banner-label' class='banner-label'>Productie Planning</div>
         ${getEyeButton()}
-        <button class='banner_button' onClick="selectDay()" title="Selecteer datum" style="margin-left:0px; padding-left:0px;">&#128198;</button>
+        <button class='banner-btn' onClick="selectDay()" title="Selecteer datum" style="margin-left:0px; padding-left:0px;">&#128198;</button>
         <input type='date' id='datePicker' style='display: none;'>
-        <button class='banner_button' onClick="addDay()" title="Volgende">></button>
+        <button class='banner-btn' id="add-date-btn" title="Volgende">></button>
       </div>
-      <script>
-  console.log("Inline JS works");
-</script>
+      <div class='table-container'>
+            <table>
+              <thead>
+                <tr>
+                  <th>Uur</th>
+                  <th>Lijn</th>
+                  <th>Transporteur</th>
+                  <th>Order</th>
+                  <th>Klant</th>
+                  <th>Plaats</th>
+                  <th>MixPro</th>
+				          <th id='th-sap' style="display: none;">SAP</th>
+                  <th>EN-m³</th>
+                  <th>Opmerking product</th>
+                  <th>Opmerking levering</th>
+				  <th id='th-production' style="display: none;">production</th>
+                  <th>Aankomst</th>
+                  <th>Vertrek</th>
+                </tr>
+              </thead>
+              <tbody id='planning-table'>
+                <tr>
+                  <td colspan=13 rowspan=2 style="color: grey; height:2em;">
+                    Check the connection to the database
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+		</div>
     </div>
   `;
+}
+
+export function init(root) {
+  const bannerLabel = document.getElementById('banner-label');
+  const planningTable = document.getElementById('planning-table');
+  const layer = document.querySelector(".tooltip-layer");
+
+  if (view_mode === RECEP_MODE) {
+    root.querySelector("#th-sap").style.display = "table-cell";
+    root.querySelector("#th-production").style.display = "table-cell";
+  } else {
+    root.querySelector("#th-sap").style.display = "none";
+    root.querySelector("#th-production").style.display = "none";
+  }
+
+  root.querySelector("#sub-date-btn").onclick = () => { subDay() };
+  root.querySelector("#view-mode-btn").onclick = () => { changeView() };
+  root.querySelector("#add-date-btn").onclick = () => { addDay() };
 }
 
 export function destroy() { }

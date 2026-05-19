@@ -10,7 +10,7 @@
   z-index: 9999 !important;
 }
 
-.table_container {
+.table-container {
 	border-radius: 10px;
 	border: solid 1px #AAAAAA;
 	overflow: auto;
@@ -34,7 +34,7 @@
 	overflow: visible;
 }
 
-.banner_button {
+.banner-btn {
 	background-color: #AFA;
 	width: 1.5em;
 	max-height: 1.5em;
@@ -46,11 +46,11 @@
 	cursor: pointer;
 }
 
-.banner_button:hover {
+.banner-btn:hover {
 	background-color: #9E9;
 }
 
-.banner_label {
+.banner-label {
 	flex-grow: 1;
 	background-color: #AFA;
 	border-radius: 10px;
@@ -62,12 +62,12 @@
 	box-shadow: 0.07em 0.07em 0.1em #AAAAAAAA;
 }
 
-.drop_button {
+.drop-btn {
 	position: relative;
 	overflow: visible;
 }
 
-.drop_panel {
+.drop-panel {
 	display: flex;
     flex-direction: column;
 	position: absolute;
@@ -90,7 +90,7 @@
 	overflow: hidden;
 }
 
-.drop_item {
+.drop-item {
 	font-size: 0.7em;
 	border-radius: 10px;
 	border-top-left-radius: 0px;
@@ -98,7 +98,7 @@
 	text-wrap: nowrap;	
 }
 
-.drop_item:hover {
+.drop-item:hover {
 	background-color: #0001;
 	text-decoration-line: underline;
 	text-decoration-style: solid;
@@ -106,7 +106,7 @@
 	box-shadow: 0.07em 0.07em 0.1em #0002;
 }
 
-.drop_button:hover .drop_panel {
+.drop-button:hover .drop-panel {
 	opacity: 1;
 	transform: scaleY(1);
 }

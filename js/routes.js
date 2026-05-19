@@ -7,7 +7,7 @@ const routes = {
   "#/planning": {
     component: "planning/index",
     children: {
-      "current": "planning/current",
+      "current": "planning/index",
       "new": "planning/new",
       "supplies": "planning/supplies",
       "history": "planning/history"
