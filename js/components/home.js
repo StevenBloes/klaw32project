@@ -1,4 +1,4 @@
-export const title = "KLA W32 - Home";
+export const title = "KLA W32 - Startpagina";
 
 function createWelcomeText(){
 	return "Welcome";
@@ -6,7 +6,7 @@ function createWelcomeText(){
 
 export function render() {
   return `
-    <h1 id="welcome"></h1>
+    <h1 id="welcome">${createWelcomeText()}</h1>
 
     <button id="btnPlanning">Planning</button>
     <button id="btnPhones">Phones</button>
@@ -15,8 +15,6 @@ export function render() {
 }
 
 export function init(root) {
-  root.getElementById("welcome") = createWelcome();
-  
   root.querySelector("#btnPlanning").onclick = () => {
     window.location.hash = "#/planning";
   };
