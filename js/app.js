@@ -1,4 +1,4 @@
-import { initRouter } from "./js/router.js";
+import { initRouter } from "./router.js";
 
 initRouter();
 
