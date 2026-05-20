@@ -19,11 +19,11 @@ export function init(root) {
     window.location.hash = "#/planning";
   };
 
-  root.querySelector("#btnPhones").onclick = () => {
+  root.querySelector("#btnStock").onclick = () => {
     window.location.hash = "#/stock";
   };
 
-  root.querySelector("#btnLaptops").onclick = () => {
+  root.querySelector("#btnQuality").onclick = () => {
     window.location.hash = "#/";
   };
 }
