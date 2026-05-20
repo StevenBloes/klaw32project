@@ -114,7 +114,7 @@
 	box-shadow: 0.07em 0.07em 0.1em #0002;
 }
 
-.drop-button:hover .drop-panel {
+.drop-btn:hover .drop-panel {
 	opacity: 1;
 	transform: scaleY(1);
 }

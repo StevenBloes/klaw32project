@@ -97,7 +97,7 @@ function incrementConfirmation(id, current_value) {
   } else {
     new_value = 0;
   }
-  fetch(`https://192.168.28.132:3000/arrconfirm/${id}`, {
+  fetch(`http://192.168.28.132:3000/arrconfirm/${id}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ new_value })
@@ -113,7 +113,7 @@ function save_production_code(id, new_value) {
   if (!String(new_value).startsWith(0) && String(new_value).trim() !== "") {
     new_value = "0" + String(new_value).trim();
   }
-  fetch(`https://192.168.28.132:3000/edit_prod/${id}`, {
+  fetch(`http://192.168.28.132:3000/edit_prod/${id}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ new_value })
@@ -130,7 +130,7 @@ function check_time_format(value) {
 
 // save arrival time
 function save_arrival(id, new_value) {
-  fetch(`https://192.168.28.132:3000/edit_arr/${id}`, {
+  fetch(`http://192.168.28.132:3000/edit_arr/${id}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ new_value })
@@ -142,7 +142,7 @@ function save_arrival(id, new_value) {
 
 // save departure time
 function save_departure(id, new_value) {
-  fetch(`https://192.168.28.132:3000/edit_dep/${id}`, {
+  fetch(`http://192.168.28.132:3000/edit_dep/${id}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ new_value })
@@ -156,7 +156,7 @@ function save_departure(id, new_value) {
 async function loadPlanning() {
   try {
     const response = await fetch(
-      "https://192.168.28.132:3000/planning?date=" + encodeURIComponent(date.toISOString().substring(0, 10))
+      "http://192.168.28.132:3000/planning?date=" + encodeURIComponent(date.toISOString().substring(0, 10))
     );
 
     if (!response.ok) {
@@ -546,13 +546,13 @@ export function render() {
       <div class="banner">
         <button class="banner-btn" id="sub-date-btn" title="Vorige"><</button>
         <div class="banner-btn drop-btn" onclick="">&#128437;
-		  <div class="drop-panel">
-		    <div class="drop-item">Huidige Planning</div>
-			<div class="drop-item">Nieuwe Planning</div>
-			<div class="drop-item">Benodigdheden</div>
-			<div class="drop-item">Historiek</div>
-		  </div>
-		</div>
+		      <div class="drop-panel">
+		        <div class="drop-item">Huidige Planning</div>
+			      <div class="drop-item">Nieuwe Planning</div>
+			      <div class="drop-item">Benodigdheden</div>
+			      <div class="drop-item">Historiek</div>
+		      </div>
+		    </div>
         <div id='banner-label' class='banner-label'>Productie Planning</div>
         ${getEyeButton()}
         <button class='banner-btn' id="change-date-btn" title="Selecteer datum" style="margin-left:0px; padding-left:0px;">&#128198;</button>
