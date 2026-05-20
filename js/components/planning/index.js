@@ -3,8 +3,18 @@ export const title = "KLA W32 - Productie Planning";
 // Global constants
 let date = new Date();
 
+let rootEl;
+
+let bannerLabel;
+let planningTable;
+let layer;
+
 const PROD_MODE = 0;
 const RECEP_MODE = 1;
+
+// for load table loop
+let timeoutId = null;
+let destroyed = false;
 
 // default the view to the production view
 let view_mode = parseInt(getFromLocalStorage('view_mode') ? getFromLocalStorage('view_mode') : PROD_MODE);
@@ -41,16 +51,14 @@ function deleteFromLocalStorage(name) {
 
 
 // change view
-function changeView() {
+function changeView(root) {
   if (view_mode === PROD_MODE) {
     view_mode = RECEP_MODE;
-    document.getElementById('th_sap').style.display = "table-cell";
-    document.getElementById('th_production').style.display = "table-cell";
   } else {
     view_mode = PROD_MODE;
-    document.getElementById('th_sap').style.display = "none";
-    document.getElementById('th_production').style.display = "none";
   }
+
+  root.classList.toggle("recep-mode", view_mode === RECEP_MODE);
 
   saveToLocalStorage("view_mode", view_mode);
   loadPlanning();
@@ -144,8 +152,293 @@ function save_departure(id, new_value) {
     .catch(err => console.error(err));
 }
 
+// load table data
+async function loadPlanning() {
+  try {
+    const response = await fetch(
+      "http://192.168.28.132:3000/planning?date=" + encodeURIComponent(date.toISOString().substring(0, 10))
+    );
+
+    if (!response.ok) {
+      console.error("HTTP ERROR:", response.status, response.statusText);
+      throw new Error("Server returned " + response.status);
+    } else {
+      const data = await response.json();
+
+      l1_counter = 0;
+      l2_counter = 0;
+      l3_counter = 0;
+      bb_counter = 0;
+      total = data.length;
+
+      count = data
+        .filter(row => row.arrival_time && row.arrival_confirmation === 0 && !row.departure_time)
+        .length;
+
+      let transport = "";
+      let transport_link = "";
+
+      planningTable.innerHTML = "";
+      data.map((row, i, arr) => {
+        const tr = document.createElement("tr");
+        if (view_mode === PROD_MODE) {
+          tr.ondblclick = () => incrementConfirmation(row.idPlanning, row.arrival_confirmation);
+        }
+        // set color of row (yellow = arrived, green = confirmed, blue = finished)
+        if (row.arrival_time !== null) {
+          if (row.departure_time !== null) {
+            tr.style.color = "#6666";
+          } else {
+            if (row.arrival_confirmation === 0) {
+              tr.style.backgroundColor = "#FFFF55";
+            } else if (row.arrival_confirmation === 1) {
+              tr.style.backgroundColor = "#BBEEAAAA";
+            } else if (row.arrival_confirmation === 2) {
+              tr.style.backgroundColor = "#AACCFFAA";
+            }
+          }
+        }
+        // set empty rows between truck drivers
+        if (transport) {
+          if (row.link_spriet) {
+            if (row.link_spriet === transport_link) {
+              transport = row.transport;
+            } else {
+              transport = row.transport;
+              transport_link = row.link_spriet;
+              const empty = document.createElement("tr");
+              empty.style.backgroundColor = "#DDE5";
+              if (view_mode === PROD_MODE) {
+                empty.innerHTML = `<td colspan="12">&nbsp;</td>`;
+              } else {
+                empty.innerHTML = `<td colspan="14">&nbsp;</td>`;
+              }
+              planningTable.appendChild(empty);
+            }
+          } else {
+            if (row.transport === transport) {
+              transport = row.transport;
+            } else {
+              transport = row.transport;
+              transport_link = row.link_spriet;
+              const empty = document.createElement("tr");
+              empty.style.backgroundColor = "#DDE5";
+              if (view_mode === PROD_MODE) {
+                empty.innerHTML = `<td colspan="12">&nbsp;</td>`;
+              } else {
+                empty.innerHTML = `<td colspan="14">&nbsp;</td>`;
+              }
+              planningTable.appendChild(empty);
+            }
+          }
+        } else {
+          transport = row.transport;
+          if (row.link_spriet) {
+            transport_link = row.link_spriet;
+          }
+        }
+        // create cells and apply extra styling if necessary
+        let td_expected = document.createElement("td");
+        td_expected.innerHTML = row.expected_time ? String(row.expected_time).substring(0, 5) : "";
+        let td_line = document.createElement("td");
+        td_line.innerHTML = row.line;
+        let td_transport = document.createElement("td");
+        td_transport.innerHTML = row.transport;
+        let td_order = document.createElement("td");
+        td_order.innerHTML = row.order_reference;
+        let td_customer = document.createElement("td");
+        td_customer.innerHTML = row.customer;
+        // if transport_id is the same as the previous or next row apply a red border to the cell
+        if (i < arr.length - 1) {
+          if (row.idPlanning === arr[i + 1].idPlanning) {
+            td_customer.style.borderLeft = "red 2px solid";
+            td_customer.style.borderRight = "red 2px solid";
+            if (i > 0) {
+              if (row.idPlanning !== arr[i - 1].idPlanning) {
+                td_customer.style.borderTop = "red 2px solid";
+              }
+            } else {
+              td_customer.style.borderTop = "red 2px solid";
+            }
+          }
+        }
+        if (i > 0) {
+          if (row.idPlanning === arr[i - 1].idPlanning) {
+            td_customer.style.borderLeft = "red 2px solid";
+            td_customer.style.borderRight = "red 2px solid";
+            if (i < arr.length - 1) {
+              if (row.idPlanning !== arr[i + 1].idPlanning) {
+                td_customer.style.borderBottom = "red 2px solid";
+              }
+            } else {
+              td_customer.style.borderBottom = "red 2px solid";
+            }
+          }
+        }
+        let td_location = document.createElement("td");
+        if (view_mode === PROD_MODE) {
+          td_location.innerHTML = row.location.replace(/^\d{4,5}\s+/, "").trim();
+        } else {
+          td_location.innerHTML = row.location.trim();
+        }
+        let td_mixpro = document.createElement("td");
+        td_mixpro.innerHTML = row.mixpro_code;
+        td_mixpro.dataset.tip = "Verwachte densiteit " + row.density + " kg/EN-m³";
+        let td_sap = document.createElement("td");
+        td_sap.classList.add("hideable_column");
+        td_sap.innerHTML = row.sap_code;
+        let td_amount = document.createElement("td");
+        td_amount.innerHTML = row.amount;
+        let td_op_remarks = document.createElement("td");
+        if (String(row.op_remarks).toUpperCase().includes("BIO") && row.departure_time === null) {
+          td_op_remarks.style.color = "#FF0000";
+          td_op_remarks.style.backgroundColor = "#FBB5";
+        }
+        td_op_remarks.innerHTML = row.op_remarks;
+        let td_time_remarks = document.createElement("td");
+        td_time_remarks.innerHTML = row.time_remarks;
+        let td_production_code = document.createElement("td");
+        td_production_code.classList.add("hideable_column");
+        td_production_code.contentEditable = "true";
+        td_production_code.innerHTML = row.production_code;
+        td_production_code.setAttribute("idPlanning", row.id_ordered_product);
+        td_production_code.addEventListener("focusin", (e) => {
+          const el = document.activeElement;
+          prev_text = el.innerHTML;
+          isEditing = true;
+        });
+        td_production_code.addEventListener("focusout", (e) => {
+          isEditing = false;
+        });
+        td_production_code.addEventListener('keydown', (e) => {
+          const el = document.activeElement;
+          if (e.key === "Enter") {
+            e.preventDefault();
+            save_production_code(el.getAttribute("idPlanning"), el.innerHTML.replace("<br>", ""));
+            isEditing = false;
+          } else if (e.key === "Escape") {
+            el.innerHTML = prev_text;
+            isEditing = false;
+          }
+        });
+
+        // create arrival time cell
+        let td_arrival = document.createElement("td");
+        td_arrival.contentEditable = "true";
+        td_arrival.innerHTML = row.arrival_time ? String(row.arrival_time).substring(0, 5) : "";
+        td_arrival.setAttribute("idPlanning", row.idPlanning);
+        td_arrival.addEventListener("focusin", (e) => {
+          const el = document.activeElement;
+          prev_text = el.innerHTML;
+          isEditing = true;
+        });
+        td_arrival.addEventListener("focusout", (e) => {
+          isEditing = false;
+        });
+        td_arrival.addEventListener('keydown', (e) => {
+          const el = document.activeElement;
+          if (e.key === "Enter") {
+            e.preventDefault();
+            save_arrival(el.getAttribute("idPlanning"), el.innerHTML.replace("<br>", ""));
+            isEditing = false;
+          } else if (e.key === "Escape") {
+            el.innerHTML = prev_text;
+            isEditing = false;
+          }
+        });
+        // create departure time cell
+        let td_departure = document.createElement("td");
+        td_departure.contentEditable = "true";
+        td_departure.innerHTML = row.departure_time ? String(row.departure_time).substring(0, 5) : "";
+        td_departure.setAttribute("idPlanning", row.idPlanning);
+        td_departure.addEventListener("focusin", (e) => {
+          const el = document.activeElement;
+          prev_text = el.innerHTML;
+          isEditing = true;
+        });
+        td_departure.addEventListener("focusout", (e) => {
+          isEditing = false;
+        });
+        td_departure.addEventListener('keydown', (e) => {
+          const el = document.activeElement;
+          if (e.key === "Enter") {
+            e.preventDefault();
+            save_departure(el.getAttribute("idPlanning"), el.innerHTML.replace("<br>", ""));
+            isEditing = false;
+          } else if (e.key === "Escape") {
+            el.innerHTML = prev_text;
+            isEditing = false;
+          }
+        });
+        // append cells to row
+        tr.appendChild(td_expected);
+        tr.appendChild(td_line);
+        tr.appendChild(td_transport);
+        tr.appendChild(td_order);
+        tr.appendChild(td_customer);
+        tr.appendChild(td_location);
+        tr.appendChild(td_mixpro);
+        tr.appendChild(td_sap);
+        tr.appendChild(td_amount);
+        tr.appendChild(td_op_remarks);
+        tr.appendChild(td_time_remarks);
+        tr.appendChild(td_production_code);
+        tr.appendChild(td_arrival);
+        tr.appendChild(td_departure);
+        // add tooltip with density to row
+        let div = document.createElement("div");
+        div.classList.add("tip");
+        if (i >= data.length - 2) {
+          div.style.top = "-170%";
+        }
+        div.innerHTML = "Verwachte densiteit " + row.density + " kg/EN-m³";
+        td_mixpro.classList.add("tooltip");
+        td_mixpro.appendChild(div);
+        // append row to table
+        planningTable.appendChild(tr);
+        // count lines
+        if (row.line == 1) {
+          l1_counter = l1_counter + 1;
+        } else if (row.line == 2) {
+          l2_counter = l2_counter + 1;
+        } else if (row.line == 3) {
+          l3_counter = l3_counter + 1;
+        } else if (row.line === 'BB') {
+          bb_counter = bb_counter + 1;
+        }
+      });
+    }
+  } catch (err) {
+    console.error("FETCH ERROR:", err);
+  }
+}
+
+// loop for loading table
+function loop() {
+  if (destroyed) {
+    return;
+  }
+  if (!isEditing) {
+    loadPlanning();
+
+    if (count > 0) {
+      bannerLabel.classList.add("pulse");
+    } else {
+      bannerLabel.classList.remove("pulse");
+    }
+
+    bannerLabel.innerHTML = "Planning " + date.toISOString().substring(0, 10) + " <small>(<small>Totaal: " + total +
+      " => L1: " + l1_counter +
+      " | L2: " + l2_counter +
+      " | L3: " + l3_counter +
+      " | BB: " + bb_counter +
+      "</small>)</small>";
+  }
+  timeoutId = setTimeout(loop, 7500); // schedule next run
+}
 
 
+// SVG with animated eye and arrows 
 function getEyeButton() {
   return `<svg 
     id='view-mode-btn' class='banner-btn' title="Verander tabel" width="85mm" height="85mm" viewBox="0 0 85 85" xmlns="http://www.w3.org/2000/svg">
@@ -197,7 +490,7 @@ function getEyeButton() {
           animation: openEye 0.6s ease forwards; 
         }
         </style>
-        <g id="layer1" onClick="changeView()">
+        <g id="layer1">
           <rect
             x="0" y="0"
             width="85" height="85"
@@ -262,7 +555,7 @@ export function render() {
 		</div>
         <div id='banner-label' class='banner-label'>Productie Planning</div>
         ${getEyeButton()}
-        <button class='banner-btn' onClick="selectDay()" title="Selecteer datum" style="margin-left:0px; padding-left:0px;">&#128198;</button>
+        <button class='banner-btn' id="change-date-btn" title="Selecteer datum" style="margin-left:0px; padding-left:0px;">&#128198;</button>
         <input type='date' id='datePicker' style='display: none;'>
         <button class='banner-btn' id="add-date-btn" title="Volgende">></button>
       </div>
@@ -277,11 +570,11 @@ export function render() {
                   <th>Klant</th>
                   <th>Plaats</th>
                   <th>MixPro</th>
-				          <th id='th-sap' style="display: none;">SAP</th>
+				          <th class="hideable_column">SAP</th>
                   <th>EN-m³</th>
                   <th>Opmerking product</th>
                   <th>Opmerking levering</th>
-				  <th id='th-production' style="display: none;">production</th>
+				          <th class="hideable_column">Productie</th>
                   <th>Aankomst</th>
                   <th>Vertrek</th>
                 </tr>
@@ -301,21 +594,24 @@ export function render() {
 }
 
 export function init(root) {
-  const bannerLabel = document.getElementById('banner-label');
-  const planningTable = document.getElementById('planning-table');
-  const layer = document.querySelector(".tooltip-layer");
+  rootEl = root;
+  destroyed = false;
 
-  if (view_mode === RECEP_MODE) {
-    root.querySelector("#th-sap").style.display = "table-cell";
-    root.querySelector("#th-production").style.display = "table-cell";
-  } else {
-    root.querySelector("#th-sap").style.display = "none";
-    root.querySelector("#th-production").style.display = "none";
-  }
+  bannerLabel = root.querySelector("#banner-label");
+  planningTable = root.querySelector("#planning-table");
+  layer = root.querySelector(".tooltip-layer");
+
+  root.classList.toggle("recep-mode", view_mode === RECEP_MODE);
 
   root.querySelector("#sub-date-btn").onclick = () => { subDay() };
-  root.querySelector("#view-mode-btn").onclick = () => { changeView() };
+  root.querySelector("#view-mode-btn").onclick = () => { changeView(rootEl) };
+  root.querySelector("#change-date-btn").onclick = () => { selectDay() };
   root.querySelector("#add-date-btn").onclick = () => { addDay() };
+
+  loop();
 }
 
-export function destroy() { }
+export function destroy() {
+  destroyed = true;
+  clearTimeout(timeoutId);
+}

@@ -25,6 +25,14 @@
 	padding: 1em 0.01em;
 }
 
+.hideable_column {
+	display: none;
+}
+
+.recep-mode .hideable_column {
+  display: table-cell;
+}
+
 .banner {
 	display: flex;
 	margin-bottom: 6px;
@@ -140,10 +148,10 @@
 
 .pulse {
 	background: #AFA;
-	animation: pulseYellow 6s infinite linear;
+	animation: pulseColors 6s infinite linear;
 }
 
-@keyframes pulseYellow{
+@keyframes pulseColors{
   0%   { filter: hue-rotate(0deg); }
   10% { background-color: #FF0; }
   40%  { filter: hue-rotate(0deg); }

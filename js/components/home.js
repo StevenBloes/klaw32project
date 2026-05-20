@@ -9,8 +9,8 @@ export function render() {
     <h1 id="welcome">${createWelcomeText()}</h1>
 
     <button id="btnPlanning">Planning</button>
-    <button id="btnPhones">Phones</button>
-    <button id="btnLaptops">Laptops</button>
+    <button id="btnStock">Stock Management</button>
+    <button id="btnQuality">Quality Management</button>
   `;
 }
 
