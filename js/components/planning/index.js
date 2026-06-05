@@ -4,6 +4,7 @@ export const title = "KLA W32 - Productie Planning";
 let date = new Date();
 
 let rootEl;
+let activeEl;
 
 let bannerLabel;
 let planningTable;
@@ -49,6 +50,7 @@ function deleteFromLocalStorage(name) {
   localStorage.removeItem(name);
 }
 
+/***********************************************************************/
 
 // change view
 function changeView(root) {
@@ -105,6 +107,13 @@ function incrementConfirmation(id, current_value) {
     .then(res => res.json())
     .then(data => { loadPlanning(); })
     .catch(err => console.error(err));
+}
+
+// function to set current Element that is edited
+function setEditingElement() {
+  activeEl = document.activeElement;
+  prev_text = activeEl.innerHTML;
+  isEditing = true;
 }
 
 // save production code
@@ -303,21 +312,19 @@ async function loadPlanning() {
         td_production_code.innerHTML = row.production_code;
         td_production_code.setAttribute("idPlanning", row.id_ordered_product);
         td_production_code.addEventListener("focusin", (e) => {
-          const el = document.activeElement;
-          prev_text = el.innerHTML;
-          isEditing = true;
+          setEditingElement();
         });
         td_production_code.addEventListener("focusout", (e) => {
+          save_production_code(activeEl.getAttribute("idPlanning"), activeEl.innerHTML.replace("<br>", ""));
           isEditing = false;
         });
         td_production_code.addEventListener('keydown', (e) => {
-          const el = document.activeElement;
           if (e.key === "Enter") {
             e.preventDefault();
-            save_production_code(el.getAttribute("idPlanning"), el.innerHTML.replace("<br>", ""));
+            save_production_code(activeEl.getAttribute("idPlanning"), activeEl.innerHTML.replace("<br>", ""));
             isEditing = false;
           } else if (e.key === "Escape") {
-            el.innerHTML = prev_text;
+            activeEl.innerHTML = prev_text;
             isEditing = false;
           }
         });
@@ -328,21 +335,19 @@ async function loadPlanning() {
         td_arrival.innerHTML = row.arrival_time ? String(row.arrival_time).substring(0, 5) : "";
         td_arrival.setAttribute("idPlanning", row.idPlanning);
         td_arrival.addEventListener("focusin", (e) => {
-          const el = document.activeElement;
-          prev_text = el.innerHTML;
-          isEditing = true;
+          setEditingElement();
         });
         td_arrival.addEventListener("focusout", (e) => {
+          save_arrival(activeEl.getAttribute("idPlanning"), activeEl.innerHTML.replace("<br>", ""));
           isEditing = false;
         });
         td_arrival.addEventListener('keydown', (e) => {
-          const el = document.activeElement;
           if (e.key === "Enter") {
             e.preventDefault();
-            save_arrival(el.getAttribute("idPlanning"), el.innerHTML.replace("<br>", ""));
+            save_arrival(activeEl.getAttribute("idPlanning"), activeEl.innerHTML.replace("<br>", ""));
             isEditing = false;
           } else if (e.key === "Escape") {
-            el.innerHTML = prev_text;
+            activeEl.innerHTML = prev_text;
             isEditing = false;
           }
         });
@@ -352,21 +357,19 @@ async function loadPlanning() {
         td_departure.innerHTML = row.departure_time ? String(row.departure_time).substring(0, 5) : "";
         td_departure.setAttribute("idPlanning", row.idPlanning);
         td_departure.addEventListener("focusin", (e) => {
-          const el = document.activeElement;
-          prev_text = el.innerHTML;
-          isEditing = true;
+          setEditingElement();
         });
         td_departure.addEventListener("focusout", (e) => {
+          save_departure(activeEl.getAttribute("idPlanning"), activeEl.innerHTML.replace("<br>", ""));
           isEditing = false;
         });
         td_departure.addEventListener('keydown', (e) => {
-          const el = document.activeElement;
           if (e.key === "Enter") {
             e.preventDefault();
-            save_departure(el.getAttribute("idPlanning"), el.innerHTML.replace("<br>", ""));
+            save_departure(activeEl.getAttribute("idPlanning"), activeEl.innerHTML.replace("<br>", ""));
             isEditing = false;
           } else if (e.key === "Escape") {
-            el.innerHTML = prev_text;
+            activeEl.innerHTML = prev_text;
             isEditing = false;
           }
         });
@@ -388,12 +391,34 @@ async function loadPlanning() {
         // add tooltip with density to row
         let div = document.createElement("div");
         div.classList.add("tip");
-        if (i >= data.length - 2) {
+        if (i >= data.length - 3) {
           div.style.top = "-170%";
         }
-        div.innerHTML = "Verwachte densiteit " + row.density + " kg/EN-m³";
+        div.innerHTML = row.density ? "Verwachte densiteit " + row.density + " kg/EN-m³<br>Verwachte gewicht " + Math.round((row.density * row.amount) / 100) / 10 + " ton" : "Nieuw recept";
         td_mixpro.classList.add("tooltip");
         td_mixpro.appendChild(div);
+        // add tooltip for extra actions
+        let control = document.createElement("div");
+        control.classList.add("tip");
+        if (i >= data.length - 3) {
+          control.style.top = "-170%";
+        }
+        if ((row.id_ordered_product % 250) === 0) {
+          control.innerHTML = "<u>Controle:</u><br>Volumemeetsysteem<br>LABO";
+          td_arrival.classList.add("tooltip", "volume-control-td");
+          td_arrival.style.border = "2px solid red";
+          //td_arrival.appendChild(control);
+        } else if ((row.id_ordered_product % 30) === 0) {
+          control.innerHTML = "<u>Controle:</u><br>Weging bij Huys";
+          td_arrival.classList.add("tooltip", "weight-control-td");
+          td_arrival.style.border = "2px solid orange";
+          //td_arrival.appendChild(control);
+        } else if ((row.id_ordered_product % 10) === 0 && row.transport.indexOf("vaeke") < 0 && row.transport.indexOf("raecke") < 0 && row.transport.indexOf("bouvere") < 0 && row.transport.indexOf("eDeCe") < 0 && row.transport.indexOf("labbinck") < 0) {
+          control.innerHTML = "<u>Controle:</u><br>Laadruimte";
+          td_arrival.classList.add("tooltip", "cleaning-control-td");
+          td_arrival.style.border = "2px solid blue";
+          //td_arrival.appendChild(control);
+        }
         // append row to table
         planningTable.appendChild(tr);
         // count lines
@@ -408,6 +433,13 @@ async function loadPlanning() {
         }
       });
     }
+    // update bannerlabel
+    bannerLabel.innerHTML = "Planning " + date.toISOString().substring(0, 10) + " <small>(<small>Totaal: " + total +
+          " => L1: " + l1_counter +
+          " | L2: " + l2_counter +
+          " | L3: " + l3_counter +
+          " | BB: " + bb_counter +
+          "</small>)</small>";
   } catch (err) {
     console.error("FETCH ERROR:", err);
   }
@@ -426,17 +458,9 @@ function loop() {
     } else {
       bannerLabel.classList.remove("pulse");
     }
-
-    bannerLabel.innerHTML = "Planning " + date.toISOString().substring(0, 10) + " <small>(<small>Totaal: " + total +
-      " => L1: " + l1_counter +
-      " | L2: " + l2_counter +
-      " | L3: " + l3_counter +
-      " | BB: " + bb_counter +
-      "</small>)</small>";
   }
   timeoutId = setTimeout(loop, 7500); // schedule next run
 }
-
 
 // SVG with animated eye and arrows 
 function getEyeButton() {
@@ -461,7 +485,7 @@ function getEyeButton() {
         }
         @keyframes openEye {
           0%   { stroke-width: 4; }
-          100% { stroke-width: 3; }
+          100% { stroke-width: 2.5; }
         }
         @keyframes closeEye {
           0%   { stroke-width: 3; }
@@ -469,7 +493,7 @@ function getEyeButton() {
         }
         @keyframes openPupil {
           0%   { stroke-width: 4; }
-          100% { stroke-width: 1; }
+          100% { stroke-width: 0; }
         }
         svg #pupil { 
           animation: closeEye 0.6s ease forwards; 
@@ -540,22 +564,182 @@ function getEyeButton() {
       </svg>`
 }
 
+// SVG calendar with animated looking glass
+function getCalendarButton() {
+  return `<svg
+    id='change-date-btn' class='banner-btn' title="Selecteer datum"
+    width="780px"
+    height="700px"
+    viewBox="0 0 78 70"
+    xmlns="http://www.w3.org/2000/svg"><title>Selecteer datum</title>
+    <style>
+      svg { 
+        transform-origin: 50% 50%; cursor: pointer;
+      }
+	    #looking-glass {
+	      opacity: 0%;
+	    }
+	    .calendar-item {
+        fill:#FEF;
+	      fill-opacity:1;
+	      stroke:#000;
+	      stroke-width:1;
+	      stroke-linecap:round;
+	      stroke-linejoin:round;
+      }
+	    @keyframes fadeIn {
+        from { opacity: 0; }
+        to   { opacity: 0.95; transform: scale(0.25) translateX(-70px) translateY(-30px); }
+      }
+      @keyframes moveLR {
+        0%   { transform: scale(0.25) translateX(-70px) translateY(-30px); }
+	      33%  { transform: scale(0.25) translateX(60px) translateY(-30px); }
+	      66%  { transform: scale(0.25) translateX(-85px) translateY(45px);; }
+        100% { transform: scale(0.25) translateX(60px) translateY(45px);}
+      }
+	    svg:hover #looking-glass {
+	    transform-origin: 50% 45%;
+	    animation:
+        fadeIn 0.6s ease-out forwards,
+        moveLR 3s linear 0.65s infinite alternate;
+	    }
+    </style>
+    <g id="search-calendar">
+      <g id="calendar">
+        <rect
+         style="fill:#FFF;fill-opacity:1;stroke:#151;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"
+         id="outer-rect"
+         width="55"
+         height="45"
+         x="10"
+         y="15"
+         rx="5"
+         ry="5" />
+      <rect
+         style="fill:#31E;fill-opacity:0.3;stroke:#151;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"
+         id="top-rect"
+         width="55"
+         height="10"
+         x="10"
+         y="15"
+         rx="3"
+         ry="3" />
+      <rect
+         style="fill:#BEF;fill-opacity:1;stroke:#151;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;"
+         id="left-ring"
+         width="4"
+         height="10"
+         x="23"
+         y="10"
+         rx="2"
+         ry="3" />
+      <rect
+         style="fill:#BEF;fill-opacity:1;stroke:#151;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;"
+         id="right-ring"
+         width="4"
+         height="10"
+         x="50"
+         y="10"
+         rx="2"
+         ry="3" />
+      <rect
+         id="date-1"
+		     class="calendar-item"
+         width="7"
+         height="6"
+         x="18"
+         y="30" />
+      <rect
+         id="date-2"
+		     class="calendar-item"
+         width="7"
+         height="6"
+         x="34"
+         y="30" />
+	  <rect
+         id="date-3"
+		     class="calendar-item"
+         style="fill:orange"
+         width="7"
+         height="6"
+         x="50"
+         y="30" />
+      <rect
+         id="date-4"
+		     class="calendar-item"
+         width="7"
+         height="6"
+         x="18"
+         y="40" />
+      <rect
+         id="date-5"
+		     class="calendar-item"
+         width="7"
+         height="6"
+         x="34"
+         y="40" />
+	  <rect
+         id="date-6"
+		     class="calendar-item"
+         width="7"
+         height="6"
+         x="50"
+         y="40" />
+      <rect
+         id="date-7"
+		     class="calendar-item"
+         width="7"
+         height="6"
+         x="18"
+         y="50" />
+      <rect        
+         id="date-8"
+		     class="calendar-item"
+         width="7"
+         height="6"
+         x="34"
+         y="50" />
+	  <rect
+         id="date-9"
+		     class="calendar-item"
+         width="7"
+         height="6"
+         x="50"
+         y="50" />
+    </g>
+    <g
+       id="looking-glass">
+      <circle
+         style="fill:#5af6;stroke:#151;stroke-width:20;stroke-linecap:round;stroke-linejoin:round;"
+         id="glass"
+         cx="40"
+         cy="40"
+         r="65" />
+      <path
+         style="fill:none;stroke:#151;stroke-width:26;stroke-linecap:round;stroke-linejoin:miter;;stroke-opacity:1"
+         d="M 79,101 120,156"
+         id="handle" />
+    </g>
+  </g>
+</svg>`;
+}
+
 export function render() {
   return `
-    <div class="view">
+    <div class="view" id="child-outlet">
       <div class="banner">
         <button class="banner-btn" id="sub-date-btn" title="Vorige"><</button>
         <div class="banner-btn drop-btn" onclick="">&#128437;
 		      <div class="drop-panel">
-		        <div class="drop-item">Huidige Planning</div>
-			      <div class="drop-item">Nieuwe Planning</div>
-			      <div class="drop-item">Benodigdheden</div>
-			      <div class="drop-item">Historiek</div>
+		        <div id="curr-planning-btn" class="drop-item" style="color:grey">Huidige Planning</div>
+			      <div id="new-planning-btn" class="drop-item">Nieuwe Planning</div>
+			      <div id="needed-supplies-btn" class="drop-item">Benodigdheden</div>
+			      <div id="history-btn" class="drop-item">Historiek</div>
 		      </div>
 		    </div>
         <div id='banner-label' class='banner-label'>Productie Planning</div>
         ${getEyeButton()}
-        <button class='banner-btn' id="change-date-btn" title="Selecteer datum" style="margin-left:0px; padding-left:0px;">&#128198;</button>
+        ${getCalendarButton()}
         <input type='date' id='datePicker' style='display: none;'>
         <button class='banner-btn' id="add-date-btn" title="Volgende">></button>
       </div>
@@ -588,7 +772,7 @@ export function render() {
               </tbody>
             </table>
           </div>
-		</div>
+		  </div>
     </div>
   `;
 }
@@ -600,6 +784,11 @@ export function init(root) {
   bannerLabel = root.querySelector("#banner-label");
   planningTable = root.querySelector("#planning-table");
   layer = root.querySelector(".tooltip-layer");
+
+  root.querySelector("#curr-planning-btn").onclick = () => { window.location.hash = "#/planning/"; };
+  root.querySelector("#new-planning-btn").onclick = () => { window.location.hash = "#/planning/new"; };
+  root.querySelector("#needed-supplies-btn").onclick = () => { window.location.hash = "#/planning/supplies"; };
+  root.querySelector("#history-btn").onclick = () => { window.location.hash = "#/planning/history"; };
 
   root.classList.toggle("recep-mode", view_mode === RECEP_MODE);
 

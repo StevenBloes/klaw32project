@@ -7,12 +7,20 @@ const routes = {
   "#/planning": {
     component: "planning/index",
     children: {
-      "current": "planning/index",
+      "current": "planning/current",
       "new": "planning/new",
       "supplies": "planning/supplies",
       "history": "planning/history"
     }
+  }, 
+
+  "#/production": {
+    component: "production/index",
+    children: {
+      "detail": "production/detail"
+    }
   }
+
 };
 
 export function handleRoute() {
@@ -21,6 +29,7 @@ export function handleRoute() {
 
   const base = `#/${parts[1] || ""}`;
   const child = parts[2];
+  const param = parts[3];
 
   const route = routes[base];
 
@@ -28,7 +37,7 @@ export function handleRoute() {
 
   loadComponent(route.component).then(() => {
     if (child && route.children && route.children[child]) {
-      loadChildComponent(route.children[child]);
+      loadChildComponent(route.children[child], param);
     }
   });
 }
@@ -54,14 +63,14 @@ async function loadComponent(name) {
   app.appendChild(root);
 }
 
-async function loadChildComponent(name) {
+async function loadChildComponent(name, param) {
   const outlet = document.getElementById("child-outlet");
   if (!outlet) return;
 
   const module = await import(`./components/${name}.js`);
 
-  outlet.innerHTML = module.render();
-  if (module.init) module.init(outlet);
+  outlet.innerHTML = module.render(param);
+  if (module.init) module.init(outlet, param);
 }
 
 window.addEventListener("hashchange", handleRoute);
