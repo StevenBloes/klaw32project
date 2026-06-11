@@ -5,7 +5,7 @@ import * as localStorage from "../../utils/localStorage.js";
 import { callApi } from "../../services/apiCalls.js";
 import { exportTableToXLSX } from "../../services/xlsxServices.js"
 
-let currentSize = parseInt(localStorage.get('hist_size') ? localStorage.get('hist_size') : 0);;
+let currentSize = parseInt(localStorage.get("hist_size") ? localStorage.get("hist_size") : 0);;
 const sizes = ["#m3-btn", "#y1-btn", "#y2-btn", "#y3-btn", "#all-btn"];
 
 const UP = 0;
@@ -20,6 +20,15 @@ let prev_text;
 let isEditing = false;
 let isNavigating = false;
 let controller = null;
+
+let filterValues = JSON.parse(localStorage.get('filters')) ? JSON.parse(localStorage.get("filters")) : {
+  reference: "",
+  productionId: "",
+  customer: "",
+  recipeSAP: "",
+  recipeMixPro: "",
+  recipeName: "",
+};
 
 let saveTimeout;
 
@@ -151,15 +160,30 @@ function debounce(fn, delay) {
   }
 }
 
+function setFilterValues() {
+  filterValues = {
+    reference: document.getElementById("ref-fld").value,
+    productionId: document.getElementById("prod-fld").value,
+    customer: document.getElementById("customer-fld").value,
+    recipeSAP: document.getElementById("sap-fld").value,
+    recipeMixPro: document.getElementById("mixpro-fld").value,
+    recipeName: document.getElementById("rname-fld").value,
+  }
+
+  localStorage.save('filters', JSON.stringify(filterValues));
+
+  applyFilters();
+}
+
 function applyFilters() {
   filtered_data = data.filter(row => {
-    const reference = (row.order_reference ?? "").toString().toLowerCase().includes(document.getElementById("ref-fld").value.toLowerCase());
+    const reference = (row.order_reference ?? "").toString().toLowerCase().includes(filterValues["reference"].toLowerCase());
     //const delivery = (row.sap_delivery ?? "").toString().toLowerCase().includes(document.getElementById("ref-fld").value.toLowerCase());
-    const production_code = (row.production_code ?? "").toString().toLowerCase().includes(document.getElementById("prod-fld").value.toLowerCase());
-    const customer = (row.customer ?? "").toString().toLowerCase().includes(document.getElementById("customer-fld").value.toLowerCase());
-    const sap = (row.sap_code ?? "").toString().toLowerCase().includes(document.getElementById("sap-fld").value.toLowerCase());
-    const mixpro = (row.mixpro_code ?? "").toString().toLowerCase().includes(document.getElementById("mixpro-fld").value.toLowerCase());
-    const recipe_name = (row.recipe_name ?? "").toString().toLowerCase().includes(document.getElementById("rname-fld").value.toLowerCase());
+    const production_code = (row.production_code ?? "").toString().toLowerCase().includes(filterValues["productionId"].toLowerCase());
+    const customer = (row.customer ?? "").toString().toLowerCase().includes(filterValues["customer"].toLowerCase());
+    const sap = (row.sap_code ?? "").toString().toLowerCase().includes(filterValues["recipeSAP"].toLowerCase());
+    const mixpro = (row.mixpro_code ?? "").toString().toLowerCase().includes(filterValues["recipeMixPro"].toLowerCase());
+    const recipe_name = (row.recipe_name ?? "").toString().toLowerCase().includes(filterValues["recipeName"].toLowerCase());
 
     return reference && production_code && customer && sap && mixpro && recipe_name;
   });
@@ -281,7 +305,6 @@ function drawTable(data) {
 
 async function updateTable() {
   try {
-
     if (controller) {
       controller.abort();
     }
@@ -429,9 +452,18 @@ export function init(root) {
   root.querySelector("#y3-btn").onclick = e => { setTableSize(root, 3); };
   root.querySelector("#all-btn").onclick = e => { setTableSize(root, 4); };
 
+  // set filter values from previous session (taken from local storage)
+  root.querySelector("#ref-fld").value = filterValues["reference"];
+  root.querySelector("#prod-fld").value = filterValues["productionId"];
+  root.querySelector("#customer-fld").value = filterValues["customer"];
+  root.querySelector("#sap-fld").value = filterValues["recipeSAP"];
+  root.querySelector("#mixpro-fld").value = filterValues["recipeMixPro"];
+  root.querySelector("#rname-fld").value = filterValues["recipeName"];
+
+
   const filters = root.querySelectorAll(".search-fld");
   filters.forEach(filter => {
-    filter.addEventListener("input", debounce(applyFilters, 200));
+    filter.addEventListener("input", debounce(setFilterValues, 200));
   });
 
   const sorters = root.querySelectorAll(".sortable-th");
