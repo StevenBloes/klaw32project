@@ -1,7 +1,15 @@
 export const title = "KLA W32 - Productie Planning - Geschiedenis";
 
-let currentSize = parseInt(getFromLocalStorage('hist_size') ? getFromLocalStorage('hist_size') : 0);;
+import { TableEditor } from "../table/TableEditor.js";
+import * as localStorage from "../../utils/localStorage.js";
+import { callApi } from "../../services/apiCalls.js";
+import { exportTableToXLSX } from "../../services/xlsxServices.js"
+
+let currentSize = parseInt(localStorage.get('hist_size') ? localStorage.get('hist_size') : 0);;
 const sizes = ["#m3-btn", "#y1-btn", "#y2-btn", "#y3-btn", "#all-btn"];
+
+const UP = 0;
+const DOWN = 2;
 
 let tableBody;
 let data;
@@ -10,27 +18,43 @@ let filtered_data;
 let activeEl;
 let prev_text;
 let isEditing = false;
+let isNavigating = false;
 let controller = null;
+
+let saveTimeout;
 
 let sort_keys = []; // array of sort keys
 
-/*************************************************************************
-* Local storage: getter, setter and delete functions for local storage 
-* Can be used without a server
-*************************************************************************/
-// extract a value
-function getFromLocalStorage(name) {
-  return localStorage.getItem(name);
+function moveVertical(currentCell, direction) {
+  const currentRow = currentCell.parentElement;
+  const colIndex = currentCell.cellIndex;
+
+  const targetRow = direction === DOWN
+    ? currentRow.nextElementSibling
+    : currentRow.previousElementSibling;
+
+  if (!targetRow) return;
+
+  const targetCell = targetRow.cells[colIndex];
+
+  if (targetCell && targetCell.isContentEditable) {
+    targetCell.focus();
+
+    requestAnimationFrame(() => {
+      placeCaretAtEnd(targetCell);
+    });
+  }
 }
 
-// set a value
-function saveToLocalStorage(name, value) {
-  localStorage.setItem(name, value);
-}
+function placeCaretAtEnd(el) {
+  const range = document.createRange();
+  const sel = window.getSelection();
 
-// delete a value
-function deleteFromLocalStorage(name) {
-  localStorage.removeItem(name);
+  range.selectNodeContents(el);
+  range.collapse(false);
+
+  sel.removeAllRanges();
+  sel.addRange(range);
 }
 
 
@@ -39,7 +63,7 @@ function setTableSize(root, size) {
   if (size !== currentSize) {
     root.querySelector(sizes[currentSize]).classList.toggle("active");
     root.querySelector(sizes[size]).classList.toggle("active");
-    saveToLocalStorage('hist_size', size);
+    localStorage.save('hist_size', size);
     currentSize = size;
     tableBody.innerHTML = `<tr><td colspan=13 rowspan=2 style="color: grey; height:2em;">Connecting and retrieving data from the Database ...</td></tr>`
     updateTable();
@@ -48,28 +72,28 @@ function setTableSize(root, size) {
 
 // function to extract production codes and remove splitters
 function normalizeProductionCodes(input) {
-    // Extract numeric parts only
-    const parts = input.match(/\d+/g);
-    if (!parts || parts.length === 0) return [];
+  // Extract numeric parts only
+  const parts = input.match(/\d+/g);
+  if (!parts || parts.length === 0) return [];
 
-    const fullCodes = [];
-    const base = parts[0];
+  const fullCodes = [];
+  const base = parts[0];
 
-    fullCodes.push(base);
+  fullCodes.push(base);
 
-    for (let i = 1; i < parts.length; i++) {
-        let part = parts[i];
+  for (let i = 1; i < parts.length; i++) {
+    let part = parts[i];
 
-        // If shorter → append missing front digits
-        if (part.length < base.length) {
-            const prefix = base.slice(0, base.length - part.length);
-            part = prefix + part;
-        }
-
-        fullCodes.push(part);
+    // If shorter → append missing front digits
+    if (part.length < base.length) {
+      const prefix = base.slice(0, base.length - part.length);
+      part = prefix + part;
     }
 
-    return fullCodes;
+    fullCodes.push(part);
+  }
+
+  return fullCodes;
 }
 
 
@@ -80,54 +104,43 @@ function setEditingElement() {
   isEditing = true;
 }
 
+// function to debounce saving
+function saveDeliveryCodeDebounced(id, value) {
+  clearTimeout(saveTimeout);
+
+  saveTimeout = setTimeout(() => {
+    saveDeliveryCode(id, value);
+  }, 200);
+}
+
 // function to save edited delivery code
-function saveDeliveryCode(id, value) {
+async function saveDeliveryCode(id, value) {
   if (prev_text !== value) {
-    fetch(`http://192.168.28.132:3000/edit_delivery_no/${id}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ value })
-    })
-      .then(res => res.json())
-      .then(data => { console.log(`Delivery ${value} for ${id} saved to database.`); })
-      .catch(err => console.error(err));
-  } else {
-    console.log("no change");
+    try {
+      const response = await callApi("updateDeliveryNo", { params: id, body: { value: value } });
+
+      if (data.affectedRows < 1) {
+        return false;
+      } else {
+        return true;
+      }
+    } catch (error) {
+      return false;
+    }
   }
 }
 
-// function to export the filtered and sorted data to an Excel file
 async function exportXLSX() {
   const table = document.querySelector("table");
-  const workbook = new ExcelJS.Workbook();
-  const sheet = workbook.addWorksheet("Results");
 
-  // Extract headers + rows in compact form
-  const headers = [...table.querySelectorAll("thead th")].map(th => th.innerText.trim());
-  const rows = [...tableBody.querySelectorAll("tbody tr")].map(tr => {
-    const cells = [...tr.querySelectorAll("td")];
-    return cells.map(td => String(td.textContent ?? "").replace(/\s+/g, " ").trim());
-  });
-
-  // Add Excel Table directly
-  sheet.addTable({
-    name: "ResultTable",
-    ref: "A1",
-    headerRow: true,
-    style: { theme: "TableStyleMedium9", showRowStripes: true },
-    columns: headers.map(h => ({ name: h })),
-    rows
-  });
-
-  // Export
-  const buffer = await workbook.xlsx.writeBuffer();
-  const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const blob = await exportTableToXLSX("results", table);
 
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "results.xlsx";
   a.click();
 }
+
 
 // debounce function to delay input fields to allow for longer keystrokes before applying filters
 function debounce(fn, delay) {
@@ -211,25 +224,8 @@ function drawTable(data) {
     td_ref.innerHTML = row.order_reference;
     let td_deli = document.createElement("td");
     td_deli.innerHTML = row.sap_delivery;
-    td_deli.contentEditable = "true";
-    td_deli.setAttribute("idProduction", row.production_code);
-    td_deli.addEventListener("focusin", (e) => {
-      setEditingElement();
-    });
-    td_deli.addEventListener("focusout", (e) => {
-      saveDeliveryCode(activeEl.getAttribute("idProduction"), activeEl.innerHTML.replace("<br>", ""));
-      isEditing = false;
-    });
-    td_deli.addEventListener('keydown', (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        saveDeliveryCode(activeEl.getAttribute("idProduction"), activeEl.innerHTML.replace("<br>", ""));
-        isEditing = false;
-      } else if (e.key === "Escape") {
-        activeEl.innerHTML = prev_text;
-        isEditing = false;
-      }
-    });
+    td_deli.dataset.id = row.production_code;
+    td_deli.dataset.field = "delivery";
     let td_prod = document.createElement("td");
     let prod_link = document.createElement("a"); // create hyperlink to production sheet
     prod_link.innerHTML = row.production_code;
@@ -371,8 +367,8 @@ export function render() {
       </div>
     </div>
     <div style="height: 83vh;">
-      <div class='table-container'>
-        <table>
+      <div class='table-container' id="tableWrapper">
+        <table id="historyTable">
           <thead>
             <tr>
               <th class="sortable-th" data-sort-key="expected_date">Datum</th>
@@ -390,7 +386,7 @@ export function render() {
               <th class="sortable-th" data-sort-key="departure_time">Vertrek</th>
             </tr>
           </thead>
-        <tbody id='table'>
+        <tbody id='tableBody'>
           <tr>
             <td colspan=13 rowspan=2 style="color: grey; height:2em;">
               Connecting and retrieving data from the Database ...
@@ -406,7 +402,18 @@ export function render() {
 
 export function init(root) {
 
-  tableBody = root.querySelector("#table");
+  tableBody = root.querySelector("#tableBody");
+
+  const editor = new TableEditor({
+    root: root,
+    table: "#historyTable",
+    container: "#tableWrapper",
+    fields: {
+      delivery: {
+        save: (id, value) => saveDeliveryCodeDebounced(id, value)
+      }
+    }
+  });
 
   root.querySelector("#curr-planning-btn").onclick = () => { window.location.hash = "#/planning/"; };
   root.querySelector("#new-planning-btn").onclick = () => { window.location.hash = "#/planning/new"; };

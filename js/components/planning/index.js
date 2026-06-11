@@ -1,5 +1,11 @@
 export const title = "KLA W32 - Productie Planning";
 
+import { TableEditor } from "../table/TableEditor.js";
+import * as localStorage from "../../utils/localStorage.js";
+import { callApi } from "../../services/apiCalls.js";
+import { getCalendarButton } from "../svg/calendar.js";
+import { getEyeButton } from "../svg/eyeSwitch.js";
+
 // Global constants
 let date = new Date();
 
@@ -18,7 +24,7 @@ let timeoutId = null;
 let destroyed = false;
 
 // default the view to the production view
-let view_mode = parseInt(getFromLocalStorage('view_mode') ? getFromLocalStorage('view_mode') : PROD_MODE);
+let view_mode = parseInt(localStorage.get('view_mode') ? localStorage.get('view_mode') : PROD_MODE);
 
 let isEditing = false;
 let prev_text = "";
@@ -31,27 +37,6 @@ let bb_counter = 0;
 
 let count = 0;
 
-/*************************************************************************
-* Local storage: getter, setter and delete functions for local storage 
-* Can be used without a server
-*************************************************************************/
-// extract a value
-function getFromLocalStorage(name) {
-  return localStorage.getItem(name);
-}
-
-// set a value
-function saveToLocalStorage(name, value) {
-  localStorage.setItem(name, value);
-}
-
-// delete a value
-function deleteFromLocalStorage(name) {
-  localStorage.removeItem(name);
-}
-
-/***********************************************************************/
-
 // change view
 function changeView(root) {
   if (view_mode === PROD_MODE) {
@@ -62,7 +47,7 @@ function changeView(root) {
 
   root.classList.toggle("recep-mode", view_mode === RECEP_MODE);
 
-  saveToLocalStorage("view_mode", view_mode);
+  localStorage.save("view_mode", view_mode);
   loadPlanning();
 }
 
@@ -91,24 +76,6 @@ function selectDay() {
   });
 }
 
-// adjust arrival confirmation
-function incrementConfirmation(id, current_value) {
-  let new_value = 0;
-  if (current_value < 2) {
-    new_value = current_value + 1;
-  } else {
-    new_value = 0;
-  }
-  fetch(`http://192.168.28.132:3000/arrconfirm/${id}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ new_value })
-  })
-    .then(res => res.json())
-    .then(data => { loadPlanning(); })
-    .catch(err => console.error(err));
-}
-
 // function to set current Element that is edited
 function setEditingElement() {
   activeEl = document.activeElement;
@@ -116,49 +83,62 @@ function setEditingElement() {
   isEditing = true;
 }
 
-// save production code
-function save_production_code(id, new_value) {
-  // add leading zero if not typed and if string is not empty
-  if (!String(new_value).startsWith(0) && String(new_value).trim() !== "") {
-    new_value = "0" + String(new_value).trim();
+/*************************************************************************
+* Functions for edit request to the server
+*************************************************************************/
+async function incrementConfirmation(id, current_value) {
+  let value = 0;
+  if (current_value < 2) {
+    value = current_value + 1;
+  } else {
+    value = 0;
   }
-  fetch(`http://192.168.28.132:3000/edit_prod/${id}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ new_value })
-  })
-    .then(res => res.json())
-    .then(data => { loadPlanning(); })
-    .catch(err => console.error(err));
+  try {
+    await callApi("updateArrivalConfirmation", { params: id, body: { value: value } });
+    loadPlanning();
+  } catch (error) {
+    console.error(error);
+  }
 }
 
-// check time format
-function check_time_format(value) {
-
+async function save_order_time_remark(id, value) {
+  try {
+    await callApi("updateOrderTimeRemark", { params: id, body: { value: value } });
+    loadPlanning();
+  } catch (error) {
+    console.error(error);
+  }
 }
 
-// save arrival time
-function save_arrival(id, new_value) {
-  fetch(`http://192.168.28.132:3000/edit_arr/${id}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ new_value })
-  })
-    .then(res => res.json())
-    .then(data => { loadPlanning(); })
-    .catch(err => console.error(err));
+async function save_production_code(id, value) {
+  // add leading zero if not typed and if string is not empty
+  if (!String(value).startsWith(0) && String(value).trim() !== "") {
+    value = "0" + String(value).trim();
+  }
+  try {
+    await callApi("updateProductionId", { params: id, body: { value: value } });
+    loadPlanning();
+  } catch (error) {
+    console.error(error);
+  }
 }
 
-// save departure time
-function save_departure(id, new_value) {
-  fetch(`http://192.168.28.132:3000/edit_dep/${id}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ new_value })
-  })
-    .then(res => res.json())
-    .then(data => { loadPlanning(); })
-    .catch(err => console.error(err));
+async function save_arrival(id, value) {
+  try {
+    await callApi("updateArrival", { params: id, body: { value: value } });
+    loadPlanning();
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function save_departure(id, value) {
+  try {
+    await callApi("updateDeparture", { params: id, body: { value: value } });
+    loadPlanning();
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 // load table data
@@ -171,6 +151,8 @@ async function loadPlanning() {
     if (!response.ok) {
       console.error("HTTP ERROR:", response.status, response.statusText);
       throw new Error("Server returned " + response.status);
+    } else if (response.status === 403) {
+      return;
     } else {
       const data = await response.json();
 
@@ -305,7 +287,26 @@ async function loadPlanning() {
         }
         td_op_remarks.innerHTML = row.op_remarks;
         let td_time_remarks = document.createElement("td");
+        td_time_remarks.contentEditable = "true";
         td_time_remarks.innerHTML = row.time_remarks;
+        td_time_remarks.setAttribute("order_id", row.order_id);
+        td_time_remarks.addEventListener("focusin", (e) => {
+          setEditingElement();
+        });
+        td_time_remarks.addEventListener("focusout", (e) => {
+          save_order_time_remark(activeEl.getAttribute("order_id"), activeEl.innerHTML.replace("<br>", ""));
+          isEditing = false;
+        });
+        td_time_remarks.addEventListener('keydown', (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            save_order_time_remark(activeEl.getAttribute("order_id"), activeEl.innerHTML.replace("<br>", ""));
+            isEditing = false;
+          } else if (e.key === "Escape") {
+            activeEl.innerHTML = prev_text;
+            isEditing = false;
+          }
+        });
         let td_production_code = document.createElement("td");
         td_production_code.classList.add("hideable_column");
         td_production_code.contentEditable = "true";
@@ -435,11 +436,11 @@ async function loadPlanning() {
     }
     // update bannerlabel
     bannerLabel.innerHTML = "Planning " + date.toISOString().substring(0, 10) + " <small>(<small>Totaal: " + total +
-          " => L1: " + l1_counter +
-          " | L2: " + l2_counter +
-          " | L3: " + l3_counter +
-          " | BB: " + bb_counter +
-          "</small>)</small>";
+      " => L1: " + l1_counter +
+      " | L2: " + l2_counter +
+      " | L3: " + l3_counter +
+      " | BB: " + bb_counter +
+      "</small>)</small>";
   } catch (err) {
     console.error("FETCH ERROR:", err);
   }
@@ -459,269 +460,7 @@ function loop() {
       bannerLabel.classList.remove("pulse");
     }
   }
-  timeoutId = setTimeout(loop, 7500); // schedule next run
-}
-
-// SVG with animated eye and arrows 
-function getEyeButton() {
-  return `<svg 
-    id='view-mode-btn' class='banner-btn' title="Verander tabel" width="85mm" height="85mm" viewBox="0 0 85 85" xmlns="http://www.w3.org/2000/svg">
-      <title>Wijzig Modus</title>
-      <style>
-        svg { 
-          transform-origin: 50% 50%; cursor: pointer;
-        }
-        #arrows *, #eye * {
-          stroke: #06460b;
-          transition: stroke 0.3s ease;
-        }
-        @keyframes openIris {
-          0%   { stroke: #06460b; }
-          100% { stroke: #96a69b; stroke-width: 1.5; }
-        }
-        @keyframes closeIris {
-          0%   { stroke: #96a69b; stroke-width: 1.5; }
-          100% { stroke: #06460b; stroke-width: 2; }
-        }
-        @keyframes openEye {
-          0%   { stroke-width: 4; }
-          100% { stroke-width: 2.5; }
-        }
-        @keyframes closeEye {
-          0%   { stroke-width: 3; }
-          100% { stroke-width: 4; }
-        }
-        @keyframes openPupil {
-          0%   { stroke-width: 4; }
-          100% { stroke-width: 0; }
-        }
-        svg #pupil { 
-          animation: closeEye 0.6s ease forwards; 
-        }
-        svg #iris { 
-          animation: closeIris 0.6s ease forwards; 
-        }
-        svg #outer { 
-          animation: closeEye 0.6s ease forwards; 
-        }
-        svg:hover #eye #pupil { 
-          animation: openPupil 0.6s ease forwards; 
-        }
-        svg:hover #eye #iris { 
-          animation: openIris 0.6s ease forwards; 
-        }
-        svg:hover #eye #outer { 
-          animation: openEye 0.6s ease forwards; 
-        }
-        </style>
-        <g id="layer1">
-          <rect
-            x="0" y="0"
-            width="85" height="85"
-            fill="transparent"
-            pointer-events="all"
-            id="clickArea"
-          />
-          <g id="eye">
-            <path id="outer"
-              d="M17.25 43.30C35.18 19.40 48.63 21.08 66.88 42.63 52.57 63.19 30.51 62.46 17.25 43.30Z"
-              fill="#fff" stroke-width="4.36" stroke-linecap="square" stroke-linejoin="round"/>
-            <ellipse id="iris"
-              cx="42.0" cy="42.0" rx="12.0" ry="12.0"
-              fill="#10a31d" fill-opacity="0.52" stroke-width="2.22"/>
-            <ellipse id="pupil"
-              cx="42.0" cy="42.0" rx="7.50" ry="7.5"
-              fill="#06470b" stroke-width="2.22"/>
-            <ellipse id="light"
-              cx="39.81" cy="39.82" rx="3.0" ry="3.5"
-              fill="#fff" fill-opacity="0.65" stroke-width="2.22"/>
-          </g>
-          <g id="arrows">
-            <!-- see Excel for calculations -->
-            <path id="arrow_1_tail"
-              d="M 11.9 31.1A 32 32 0 0 1 73.5 36.4"
-              fill="none" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-            <path id="arrow_2_tail"
-              d="M 72.1 52.9A 32 32 0 0 1 10.5 47.6"
-              fill="none" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-            <polyline id="arrow_1_head"
-              points="20.8 28.8, 11.9 31.1, 8.9 21.3"
-              fill="none" stroke-width="7.29" stroke-linecap="round" stroke-linejoin="round"/>
-            <polyline id="arrow_2_head"
-              points="63.2 55.2, 72.1 52.9, 75.1 62.7"
-              fill="none" stroke-width="7.29" stroke-linecap="round" stroke-linejoin="round"/>
-            <animateTransform
-              id="spin"
-              attributeName="transform"
-              type="rotate"
-              from="0 40 40"
-              to="-180 42 42"
-              dur="0.2s"
-              begin="layer1.click"
-              fill="remove"/>
-          </g>
-        </g>
-      </svg>`
-}
-
-// SVG calendar with animated looking glass
-function getCalendarButton() {
-  return `<svg
-    id='change-date-btn' class='banner-btn' title="Selecteer datum"
-    width="780px"
-    height="700px"
-    viewBox="0 0 78 70"
-    xmlns="http://www.w3.org/2000/svg"><title>Selecteer datum</title>
-    <style>
-      svg { 
-        transform-origin: 50% 50%; cursor: pointer;
-      }
-	    #looking-glass {
-	      opacity: 0%;
-	    }
-	    .calendar-item {
-        fill:#FEF;
-	      fill-opacity:1;
-	      stroke:#000;
-	      stroke-width:1;
-	      stroke-linecap:round;
-	      stroke-linejoin:round;
-      }
-	    @keyframes fadeIn {
-        from { opacity: 0; }
-        to   { opacity: 0.95; transform: scale(0.25) translateX(-70px) translateY(-30px); }
-      }
-      @keyframes moveLR {
-        0%   { transform: scale(0.25) translateX(-70px) translateY(-30px); }
-	      33%  { transform: scale(0.25) translateX(60px) translateY(-30px); }
-	      66%  { transform: scale(0.25) translateX(-85px) translateY(45px);; }
-        100% { transform: scale(0.25) translateX(60px) translateY(45px);}
-      }
-	    svg:hover #looking-glass {
-	    transform-origin: 50% 45%;
-	    animation:
-        fadeIn 0.6s ease-out forwards,
-        moveLR 3s linear 0.65s infinite alternate;
-	    }
-    </style>
-    <g id="search-calendar">
-      <g id="calendar">
-        <rect
-         style="fill:#FFF;fill-opacity:1;stroke:#151;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"
-         id="outer-rect"
-         width="55"
-         height="45"
-         x="10"
-         y="15"
-         rx="5"
-         ry="5" />
-      <rect
-         style="fill:#31E;fill-opacity:0.3;stroke:#151;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"
-         id="top-rect"
-         width="55"
-         height="10"
-         x="10"
-         y="15"
-         rx="3"
-         ry="3" />
-      <rect
-         style="fill:#BEF;fill-opacity:1;stroke:#151;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;"
-         id="left-ring"
-         width="4"
-         height="10"
-         x="23"
-         y="10"
-         rx="2"
-         ry="3" />
-      <rect
-         style="fill:#BEF;fill-opacity:1;stroke:#151;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;"
-         id="right-ring"
-         width="4"
-         height="10"
-         x="50"
-         y="10"
-         rx="2"
-         ry="3" />
-      <rect
-         id="date-1"
-		     class="calendar-item"
-         width="7"
-         height="6"
-         x="18"
-         y="30" />
-      <rect
-         id="date-2"
-		     class="calendar-item"
-         width="7"
-         height="6"
-         x="34"
-         y="30" />
-	  <rect
-         id="date-3"
-		     class="calendar-item"
-         style="fill:orange"
-         width="7"
-         height="6"
-         x="50"
-         y="30" />
-      <rect
-         id="date-4"
-		     class="calendar-item"
-         width="7"
-         height="6"
-         x="18"
-         y="40" />
-      <rect
-         id="date-5"
-		     class="calendar-item"
-         width="7"
-         height="6"
-         x="34"
-         y="40" />
-	  <rect
-         id="date-6"
-		     class="calendar-item"
-         width="7"
-         height="6"
-         x="50"
-         y="40" />
-      <rect
-         id="date-7"
-		     class="calendar-item"
-         width="7"
-         height="6"
-         x="18"
-         y="50" />
-      <rect        
-         id="date-8"
-		     class="calendar-item"
-         width="7"
-         height="6"
-         x="34"
-         y="50" />
-	  <rect
-         id="date-9"
-		     class="calendar-item"
-         width="7"
-         height="6"
-         x="50"
-         y="50" />
-    </g>
-    <g
-       id="looking-glass">
-      <circle
-         style="fill:#5af6;stroke:#151;stroke-width:20;stroke-linecap:round;stroke-linejoin:round;"
-         id="glass"
-         cx="40"
-         cy="40"
-         r="65" />
-      <path
-         style="fill:none;stroke:#151;stroke-width:26;stroke-linecap:round;stroke-linejoin:miter;;stroke-opacity:1"
-         d="M 79,101 120,156"
-         id="handle" />
-    </g>
-  </g>
-</svg>`;
+  timeoutId = setTimeout(loop, 10000); // schedule next run
 }
 
 export function render() {

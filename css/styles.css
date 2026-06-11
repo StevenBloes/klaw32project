@@ -21,6 +21,7 @@
 }
 
 .table-container {
+	position: relative;
 	border-radius: 10px;
 	border: solid 1px #AAAAAA;
 	overflow: auto;
@@ -490,5 +491,48 @@ tr:hover .volume-control-td {
 
 	.detail-layout-inner {
 		padding: 0.5em;
+	}
+}
+
+/* CSS for editing cell inside table */
+.cell-editor {
+	border: 2px solid #07D;
+	border-radius: 2px;
+	box-shadow:
+		inset 0px 0px 1px 0px #07D;
+	outline: none;
+	padding: 0 4px;
+	font: inherit;
+	box-sizing: border-box;
+}
+
+.cell-error {
+	background-color: #F002;
+	border-color: solid red 1px;
+	box-shadow:
+		inset 0px 0px 2px 0px red;
+}
+
+.cell-loading {
+	position: relative;
+}
+
+.cell-loading::after {
+	content: "";
+	position: absolute;
+	right: 4px;
+	top: 50%;
+	width: 12px;
+	height: 12px;
+	margin-top: -6px;
+	border: 2px solid #ccc;
+	border-top: 2px solid #0078d4;
+	border-radius: 50%;
+	animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+	100% {
+		transform: rotate(360deg);
 	}
 }

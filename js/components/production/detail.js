@@ -1,3 +1,7 @@
+import * as dateTimeUtils from "../../utils/formatUtils.js";
+import { callApi } from "../../services/apiCalls.js";
+import { createTableCell } from "../table/tableCell.js"
+
 let data;
 
 let bulkTable;
@@ -10,151 +14,105 @@ let fertTBody;
 let liquidTBody;
 let otherTBody
 
-async function loadData(id) {
-    document.title = `LOADING... - ${id}`;
+async function loadData(id, root) {
+  document.title = `LOADING... - ${id}`;
 
-    try {
-        const response = await fetch(
-            `http://192.168.28.132:3000/production_sheet?id=${id}`
-        );
-
-        if (!response.ok) {
-            console.error("HTTP ERROR:", response.status, response.statusText);
-            throw new Error("Server returned " + response.status);
-        } else {
-            data = await response.json();
-            document.title = `Productie - ${id}/${data[0].sap_code}`;
-            fillInfo();
-            fillTables();
-        }
-    } catch (err) {
-        console.error("FETCH ERROR:", err);
-        document.title = `ERROR - ${id}`;
-        throw new Error("Server returned " + response.status);
+  try {
+    data = await callApi("getProductionDetail", { params: id, body: {} });
+    if (!data || data.length === 0) {
+      return;
+    } else {
+      document.title = `Productie - ${id}/${data[0].sap_code}`;
+      fillInfo(root);
+      fillTables();
     }
+  } catch (error) {
+    console.error(error);
+    document.title = `ERROR - ${id}`;
+  }
 }
 
-function fillInfo() {
-    console.log(data[0]);
-    document.getElementById("order").innerHTML = data[0].order_reference;
-    document.getElementById("delivery").innerHTML = data[0].sap_delivery;
-    document.getElementById("customer").innerHTML = data[0].customer;
-    document.getElementById("recSAP").innerHTML = data[0].sap_code;
-    document.getElementById("recMixPro").innerHTML = data[0].recipe_code;
-    document.getElementById("recName").innerHTML = data[0].recipe_name;
-    document.getElementById("volumeA").innerHTML = data[0].volume_requested + "0 EN-m³";
-    document.getElementById("volumeK").innerHTML = data[0].volume_done + " m³";
-    document.getElementById("volumeD").innerHTML = data[0].en_done + " EN-m³";
-    document.getElementById("weightA").innerHTML = data[0].weight_requested + " ton";
-    document.getElementById("weightD").innerHTML = data[0].weight_done + " ton";
-    document.getElementById("density").innerHTML = data[0].density + " kg/EN-m³";
-    document.getElementById("remarks").innerHTML = String(data[0].comments).replaceAll("$D$A", "<br>");
-    document.getElementById("timeStart").innerHTML = dateTimeFormatter(data[0].time_start);
-    document.getElementById("timeEnd").innerHTML = dateTimeFormatter(data[0].time_end);
-    document.getElementById("measuredPH").innerHTML = data[0].measured_ph ? data[0].measured_ph : "N/B";
-    document.getElementById("measuredEC").innerHTML = data[0].measured_ec ? data[0].measured_ec + " µS/cm" : "N/B";
-    /* 
-    // Not necesarry but possibility exists to add expected, arrival, departure and wait times to production sheets
-    document.getElementById("timeExpected").innerHTML = data[0].expected_time ? timeFormatter(data[0].expected_time) : data[0].expected_time_var;
-    document.getElementById("timeArrival").innerHTML = timeFormatter(data[0].arrival_time) + ` <span style="opacity: 25%;">(${timeToMinutes(data[0].time_diff_arr)} min)</span>`;
-    document.getElementById("timeDeparture").innerHTML = timeFormatter(data[0].departure_time) + ` <span style="opacity: 25%;">(${timeToMinutes(data[0].time_diff_dep)} min)</span>`;
-    document.getElementById("timeCompensation").innerHTML = data[0].order_reference;
-    */
+function fillInfo(root) {
+  root.querySelector("#order").textContent = data[0].order_reference;
+  root.querySelector("#delivery").textContent = data[0].sap_delivery;
+  root.querySelector("#customer").textContent = data[0].customer;
+  root.querySelector("#recSAP").textContent = data[0].sap_code;
+  root.querySelector("#recMixPro").textContent = data[0].recipe_code;
+  root.querySelector("#recName").textContent = data[0].recipe_name;
+  root.querySelector("#volumeA").textContent = data[0].volume_requested + "0 EN-m³";
+  root.querySelector("#volumeK").textContent = data[0].volume_done + " m³";
+  root.querySelector("#volumeD").textContent = data[0].en_done + " EN-m³";
+  root.querySelector("#weightA").textContent = data[0].weight_requested + " ton";
+  root.querySelector("#weightD").textContent = data[0].weight_done + " ton";
+  root.querySelector("#density").textContent = data[0].density + " kg/EN-m³";
+  root.querySelector("#remarks").innerHTML = String(data[0].comments).replaceAll("$D$A", "<br>");
+  root.querySelector("#timeStart").textContent = dateTimeUtils.dateTimeFormatter(data[0].time_start);
+  root.querySelector("#timeEnd").textContent = dateTimeUtils.dateTimeFormatter(data[0].time_end);
+  root.querySelector("#measuredPH").textContent = data[0].measured_ph ? data[0].measured_ph : "N/B";
+  root.querySelector("#measuredEC").textContent = data[0].measured_ec ? data[0].measured_ec + " µS/cm" : "N/B";
+  root.querySelector("#timeExpected").textContent = data[0].expected_time ? dateTimeUtils.timeFormatter(data[0].expected_time) : data[0].expected_time_var;
+  root.querySelector("#timeArrival").innerHTML = `${dateTimeUtils.timeFormatter(data[0].arrival_time)}&emsp;<span style="opacity: 40%; color: ${dateTimeUtils.timeToMinutes(data[0].time_diff_arr) > 0 ? "green" : "red"};">${dateTimeUtils.timeToMinutes(data[0].time_diff_arr)} min</span>`;
+  root.querySelector("#timeDeparture").innerHTML = `${dateTimeUtils.timeFormatter(data[0].departure_time)}&emsp;<span style="opacity: 40%; color: ${dateTimeUtils.timeToMinutes(data[0].time_diff_dep) < 120 ? "green" : "red"};">${dateTimeUtils.timeToMinutes(data[0].time_diff_dep)} min</span>`;
+  root.querySelector("#timeCompensation").textContent = data[0].expected_time ? dateTimeUtils.timeFormatter(data[0].expected_time) : "0 min";
+}
+
+function createRow(row) {
+  const tr = document.createElement("tr");
+  tr.appendChild(createTableCell(row.dosing_unit));
+  tr.appendChild(createTableCell(row.product_name));
+  tr.appendChild(createTableCell(row.dosing_preset));
+  tr.appendChild(createTableCell(row.dosing_done));
+  tr.appendChild(createTableCell(row.total_done));
+
+  return tr;
 }
 
 function fillTables() {
 
-    let bCount = 0;
-    let fCount = 0;
-    let lCount = 0;
-    let oCount = 0;
+  let bCount = 0;
+  let fCount = 0;
+  let lCount = 0;
+  let oCount = 0;
 
-    bulkTBody.innerHTML = "";
-    fertTBody.innerHTML = "";
-    liquidTBody.innerHTML = "";
-    otherTBody.innerHTML = "";
+  bulkTBody.textContent = "";
+  fertTBody.textContent = "";
+  liquidTBody.textContent = "";
+  otherTBody.textContent = "";
 
-    data.map((row, i, arr) => {
-        const tr = document.createElement("tr");
+  data.forEach(row => {
+    const tr = createRow(row);
 
-        let td_bunker = document.createElement("td");
-        td_bunker.innerHTML = row.dosing_unit;
-        let td_product = document.createElement("td");
-        td_product.innerHTML = row.product_name;
-        let td_setpoint = document.createElement("td");
-        td_setpoint.innerHTML = row.dosing_preset;
-        let td_avg = document.createElement("td");
-        td_avg.innerHTML = row.dosing_done;
-        let td_total = document.createElement("td");
-        td_total.innerHTML = row.total_done;
-
-        tr.appendChild(td_bunker);
-        tr.appendChild(td_product);
-        tr.appendChild(td_setpoint);
-        tr.appendChild(td_avg);
-        tr.appendChild(td_total);
-
-        if (row.product_group === "bulk") {
-            bulkTBody.appendChild(tr);
-            bCount = bCount + 1;
-        } else if (row.product_group === "fertilizer") {
-            fertTBody.appendChild(tr);
-            fCount = fCount + 1;
-        } else if (row.product_group === "liquid") {
-            liquidTBody.appendChild(tr);
-            lCount = lCount + 1;
-        } else {
-            otherTBody.appendChild(tr);
-            oCount = oCount + 1;
-        }
-    });
-
-    if(bCount === 0){
-      bulkTable.style.display = "none";
+    if (row.product_group === "bulk") {
+      bulkTBody.appendChild(tr);
+      bCount = bCount + 1;
+    } else if (row.product_group === "fertilizer") {
+      fertTBody.appendChild(tr);
+      fCount = fCount + 1;
+    } else if (row.product_group === "liquid") {
+      liquidTBody.appendChild(tr);
+      lCount = lCount + 1;
+    } else {
+      otherTBody.appendChild(tr);
+      oCount = oCount + 1;
     }
-    if(fCount === 0){
-      fertTable.style.display = "none";
-    }
-    if(lCount === 0){
-      liquidTable.style.display = "none";
-    }
-    if(oCount === 0){
-      otherTable.style.display = "none";
-    }
-}
+  });
 
-function dateTimeFormatter(dateTimeStamp) {
-
-    const formatter = new Intl.DateTimeFormat("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false
-    });
-
-    return formatter.format(new Date(dateTimeStamp));
-}
-
-function timeFormatter(timeStamp) {
-  return timeStamp.slice(0, 5);
-}
-
-function timeToMinutes(timeStamp) {
-  let sign = 1;
-  if (timeStamp.startsWith("-")){
-    sign = -1;
-    timeStamp = timeStamp.slice(1);
+  if (bCount === 0) {
+    bulkTable.style.display = "none";
   }
-
-  const [hours, minutes, seconds] = timeStamp.split(":").map(Number);
-  return sign * (hours * 60 + minutes + (seconds ? seconds / 60 : 0));
+  if (fCount === 0) {
+    fertTable.style.display = "none";
+  }
+  if (lCount === 0) {
+    liquidTable.style.display = "none";
+  }
+  if (oCount === 0) {
+    otherTable.style.display = "none";
+  }
 }
 
 export function render(id) {
-    return `
+  return `
     <div class="detail-layout">
     <div class="table-container detail-layout-left">
     <h2>Productie info</h2>
@@ -335,17 +293,17 @@ export function render(id) {
 }
 
 export function init(root, id) {
-    bulkTable = root.querySelector("#bulk-table");
-    fertTable = root.querySelector("#fertilizer-table");
-    liquidTable = root.querySelector("#liquid-table");
-    otherTable = root.querySelector("#other-table");
+  bulkTable = root.querySelector("#bulk-table");
+  fertTable = root.querySelector("#fertilizer-table");
+  liquidTable = root.querySelector("#liquid-table");
+  otherTable = root.querySelector("#other-table");
 
-    bulkTBody = root.querySelector("#bulk-tbody");
-    fertTBody = root.querySelector("#fertilizer-tbody");
-    liquidTBody = root.querySelector("#liquid-tbody");
-    otherTBody = root.querySelector("#other-tbody");
+  bulkTBody = root.querySelector("#bulk-tbody");
+  fertTBody = root.querySelector("#fertilizer-tbody");
+  liquidTBody = root.querySelector("#liquid-tbody");
+  otherTBody = root.querySelector("#other-tbody");
 
-    loadData(id);
+  loadData(id, root);
 }
 
 export function destroy() {
