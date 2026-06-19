@@ -1,11 +1,11 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.0 Safari/537.36">
   <diagram name="Page-1" id="8IIEX-OrPOJht-Ac6j7v">
-    <mxGraphModel dx="4145" dy="1131" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="8137" dy="3844" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="3j28RAIKrqdnFfUQnr6a-20" parent="1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" value="INBOUND ORDERS / DELIVERIES" vertex="1">
-          <mxGeometry height="680" width="840" x="-2440" y="2000" as="geometry">
+          <mxGeometry height="680" width="840" x="-2440" y="2040" as="geometry">
             <mxRectangle height="30" width="230" x="-2280" y="2560" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
@@ -1102,7 +1102,7 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="3j28RAIKrqdnFfUQnr6a-24" parent="1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;direction=east;" value="TRACK AND TRACE PALLETS" vertex="1">
-          <mxGeometry height="760" width="840" x="-2440" y="1200" as="geometry">
+          <mxGeometry height="760" width="840" x="-2440" y="1240" as="geometry">
             <mxRectangle height="30" width="210" x="-2280" y="1760" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
@@ -3494,7 +3494,7 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="3j28RAIKrqdnFfUQnr6a-30" parent="1" style="swimlane;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="EXECUTION TASKS" vertex="1">
-          <mxGeometry height="520" width="840" x="-2440" y="640" as="geometry" />
+          <mxGeometry height="560" width="840" x="-2440" y="640" as="geometry" />
         </mxCell>
         <mxCell id="jShdE6lyBOF0nGJAxkGe-193" parent="3j28RAIKrqdnFfUQnr6a-30" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="execution_task" vertex="1">
           <mxGeometry height="480" width="200" x="40" y="40" as="geometry" />
