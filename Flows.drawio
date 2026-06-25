@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.0 Safari/537.36">
   <diagram name="Page-1" id="-CuGrL-6Hl5-HNev1LCo">
-    <mxGraphModel dx="4040" dy="3573" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="1768" dy="2028" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -877,6 +877,126 @@
         </mxCell>
         <mxCell id="NMaeJpBlk31hGtv1voW7-230" parent="NMaeJpBlk31hGtv1voW7-232" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;rounded=0;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" value="productievoorraad = &lt;b&gt;0&lt;/b&gt;" vertex="1">
           <mxGeometry height="25" width="150" x="501" y="207" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-2" parent="1" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1" value="Levering&lt;div&gt;palleten&lt;/div&gt;&lt;div&gt;meststof&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="110" x="1160" y="1760" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-3" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Automatische&lt;div&gt;aanmaak&amp;nbsp;&lt;div&gt;barcodes&lt;/div&gt;&lt;div&gt;&lt;u&gt;per pallet&lt;/u&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="110" x="1360" y="1760" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-4" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Invoer&amp;nbsp;&lt;div&gt;levering in systeem&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="110" x="1260" y="1760" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-5" parent="1" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1;fillColor=#f8cecc;strokeColor=#b85450;" value="Wijzigen&lt;div&gt;Opslaglocatie *&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="110" x="1160" y="1880" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-6" parent="1" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1;fillColor=#f8cecc;strokeColor=#b85450;" value="&lt;div&gt;Aanleggen&lt;/div&gt;&lt;div&gt;Productie&lt;/div&gt;&lt;div&gt;Voorraad&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="110" x="1160" y="2000" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-7" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Labelen&lt;div&gt;&amp;amp;&lt;/div&gt;&lt;div&gt;Stockeren&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="110" x="1460" y="1760" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-8" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Scannen&lt;div&gt;barcode&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="110" x="1260" y="2000" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-9" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Scannen&lt;div&gt;barcode&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="110" x="1260" y="1880" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-10" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Stockeren&amp;nbsp;&lt;div&gt;pallet&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;op&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;nieuwe locatie&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="110" x="1460" y="1880" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-11" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Stockeren&amp;nbsp;&lt;div&gt;zakken in&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;productie voorraad&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="110" x="1360" y="2000" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-12" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Invoer&lt;br&gt;&lt;div&gt;hoeveelheid zakken&lt;/div&gt;&lt;div&gt;in systeem&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="110" x="1460" y="2000" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-13" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Invoer&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;nieuwe locatie&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;in systeem&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="110" x="1360" y="1880" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-14" parent="1" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1;fillColor=#f8cecc;strokeColor=#b85450;" value="Consumptie&lt;div&gt;pallet&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="110" x="1610" y="1880" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-15" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="Invoer&lt;div&gt;correctie in&lt;/div&gt;&lt;div&gt;systeem&amp;nbsp;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="110" x="1710" y="1760" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-16" parent="1" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1;fillColor=#f8cecc;strokeColor=#b85450;" value="Consumptie&lt;div&gt;pallet&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="110" x="1610" y="2000" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-17" parent="1" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1;fillColor=#f8cecc;strokeColor=#b85450;" value="&lt;div&gt;Correctie&lt;/div&gt;Consumptie&lt;div&gt;pallet&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="110" x="1610" y="1760" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-18" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Automatische&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;invoer&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;consumptie van&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;pallet met locatie&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;meststoffen bordes&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="160" x="1710" y="1880" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-19" parent="1" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Automatische&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;invoer&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;consumptie uit&lt;/span&gt;&lt;/div&gt;&lt;div&gt;productievoorraad&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="160" x="1710" y="2000" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-20" parent="1" style="rounded=1;whiteSpace=wrap;html=1;opacity=30;textOpacity=40;" value="&lt;b&gt;* &lt;/b&gt;&lt;span style=&quot;font-size: 11px;&quot;&gt;Voor consumptie van een pallet, dient die in het meststoffen bordes te staan (=&amp;gt; wijziging locatie).&lt;/span&gt;" vertex="1">
+          <mxGeometry height="50" width="180" x="1700" y="2110" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-21" edge="1" parent="1" source="j1_U7MQMLH1wib3HESXr-19" style="endArrow=classic;html=1;rounded=0;strokeWidth=4;strokeColor=#666666;flowAnimation=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="1880" y="2040" />
+              <mxPoint x="1880" y="1980" />
+              <mxPoint x="1580" y="1979.5" />
+              <mxPoint x="1580" y="1919.5" />
+            </Array>
+            <mxPoint x="1900" y="2039.5" as="sourcePoint" />
+            <mxPoint x="1610" y="1919.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-22" parent="1" style="text;html=1;whiteSpace=wrap;align=center;verticalAlign=middle;rounded=0;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" value="productievoorraad = &lt;b&gt;0&lt;/b&gt;" vertex="1">
+          <mxGeometry height="25" width="150" x="1661" y="1967" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-40" connectable="0" parent="1" style="group" value="" vertex="1">
+          <mxGeometry height="460" width="440" x="560" y="1720" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-23" parent="j1_U7MQMLH1wib3HESXr-40" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Kaart&lt;div&gt;Locatie&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-24" parent="j1_U7MQMLH1wib3HESXr-40" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Zoek&lt;div&gt;product&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-37" edge="1" parent="j1_U7MQMLH1wib3HESXr-40" source="j1_U7MQMLH1wib3HESXr-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=5;strokeColor=#666666;" target="j1_U7MQMLH1wib3HESXr-30">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-25" parent="j1_U7MQMLH1wib3HESXr-40" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Scan" vertex="1">
+          <mxGeometry height="60" width="120" x="160" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-27" edge="1" parent="j1_U7MQMLH1wib3HESXr-40" source="j1_U7MQMLH1wib3HESXr-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=5;strokeColor=#666666;" target="j1_U7MQMLH1wib3HESXr-24">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-28" edge="1" parent="j1_U7MQMLH1wib3HESXr-40" source="j1_U7MQMLH1wib3HESXr-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=5;strokeColor=#666666;" target="j1_U7MQMLH1wib3HESXr-25">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-26" parent="j1_U7MQMLH1wib3HESXr-40" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#f8cecc;strokeColor=#b85450;" value="Startpagina" vertex="1">
+          <mxGeometry height="60" width="120" x="160" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-36" edge="1" parent="j1_U7MQMLH1wib3HESXr-40" source="j1_U7MQMLH1wib3HESXr-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=5;strokeColor=#666666;" target="j1_U7MQMLH1wib3HESXr-30">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-29" parent="j1_U7MQMLH1wib3HESXr-40" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Product Lijst" vertex="1">
+          <mxGeometry height="60" width="120" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-33" edge="1" parent="j1_U7MQMLH1wib3HESXr-40" source="j1_U7MQMLH1wib3HESXr-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=5;strokeColor=#666666;" target="j1_U7MQMLH1wib3HESXr-31">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-34" edge="1" parent="j1_U7MQMLH1wib3HESXr-40" source="j1_U7MQMLH1wib3HESXr-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=5;strokeColor=#666666;" target="j1_U7MQMLH1wib3HESXr-23">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-35" edge="1" parent="j1_U7MQMLH1wib3HESXr-40" source="j1_U7MQMLH1wib3HESXr-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=5;strokeColor=#666666;" target="j1_U7MQMLH1wib3HESXr-32">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-30" parent="j1_U7MQMLH1wib3HESXr-40" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Pallet" vertex="1">
+          <mxGeometry height="60" width="120" x="160" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-31" parent="j1_U7MQMLH1wib3HESXr-40" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Verplaatsen&lt;div&gt;pallet&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="160" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="j1_U7MQMLH1wib3HESXr-32" parent="j1_U7MQMLH1wib3HESXr-40" style="rounded=1;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Afnemen voor&lt;div&gt;productievoorraad&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="320" y="400" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
