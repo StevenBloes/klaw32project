@@ -12,15 +12,22 @@ const routes = {
       "supplies": "planning/supplies",
       "history": "planning/history"
     }
-  }, 
+  },
 
   "#/production": {
     component: "production/index",
     children: {
       "detail": "production/detail"
     }
-  }
+  },
 
+  "#/security": {
+    component: "security/index",
+    children: {
+      "new": "security/new",
+      "edit": "security/edit"
+    }
+  }
 };
 
 export function handleRoute() {

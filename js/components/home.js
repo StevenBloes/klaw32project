@@ -11,6 +11,7 @@ export function render() {
     <button id="btnPlanning">Planning</button>
     <button id="btnStock">Stock Management</button>
     <button id="btnQuality">Quality Management</button>
+    <button id="btnHarbor">Havenveiligheid</button>
   `;
 }
 
@@ -26,6 +27,10 @@ export function init(root) {
   root.querySelector("#btnQuality").onclick = () => {
     window.location.hash = "#/";
   };
+
+  root.querySelector("#btnHarbor").onclick = () => {
+    window.location.hash = "#/security";
+  }
 }
 
 export function destroy() {}
