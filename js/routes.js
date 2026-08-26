@@ -1,11 +1,18 @@
 let currentComponent = null;
+let currentBaseRoute = null;
 let currentRoot = null;
+let currentCss = null;
+let currentCssFile = null;
 
 const routes = {
-  "#/": { component: "home" },
+  "#/": { 
+    component: "home", 
+    css: "styles.css"
+  },
 
   "#/planning": {
     component: "planning/index",
+    css: "styles.css",
     children: {
       "current": "planning/current",
       "new": "planning/new",
@@ -16,6 +23,7 @@ const routes = {
 
   "#/production": {
     component: "production/index",
+    css: "styles.css",
     children: {
       "detail": "production/detail"
     }
@@ -23,9 +31,13 @@ const routes = {
 
   "#/security": {
     component: "security/index",
+    css: "security.css",
     children: {
-      "new": "security/new",
-      "edit": "security/edit"
+      "inspections": "security/inspections",
+      "deviations": "security/deviations",
+	    "actions": "security/actions",
+	    "verifications": "security/verifications",
+	    "reports": "security/reports"
     }
   }
 };
@@ -42,11 +54,20 @@ export function handleRoute() {
 
   if (!route) return loadComponent("home");
 
-  loadComponent(route.component).then(() => {
-    if (child && route.children && route.children[child]) {
-      loadChildComponent(route.children[child], param);
+  setRouteCss(route.css);
+
+  if(currentBaseRoute !== base){
+    currentBaseRoute = base;
+    loadComponent(route.component);
+  } else {
+    if(typeof(child) === "undefined"){
+      loadComponent(route.component);
     }
-  });
+  }
+
+  if (child && route.children && route.children[child]) {
+    loadChildComponent(route.children[child], param);
+  }
 }
 
 async function loadComponent(name) {
@@ -60,6 +81,7 @@ async function loadComponent(name) {
 
   app.innerHTML = "";
   const root = document.createElement("div");
+  root.id = "root";
   root.innerHTML = module.render();
 
   currentComponent = module;
@@ -84,4 +106,28 @@ window.addEventListener("hashchange", handleRoute);
 
 export function initRouter() {
   handleRoute();
+}
+
+function setRouteCss(cssFile) {
+  if (currentCssFile === cssFile) {
+    return;
+  } else {
+    currentCssFile = cssFile;
+  }
+  
+  if (currentCss) {
+    currentCss.remove();
+    currentCss = null;
+  }
+
+  if (!cssFile){
+    return;
+  }
+
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = `./css/${cssFile}`;
+  document.head.appendChild(link);
+
+  currentCss = link;
 }

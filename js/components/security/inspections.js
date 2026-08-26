@@ -1,8 +1,8 @@
-export const title = "KLA W32 - Havenveiligheid - wijzig";
+export const title = "KLA W32 - Inspecties";
 
 export function render(id) {
   return `
-    <div class="view"></div>
+    
   `;
 }
 
