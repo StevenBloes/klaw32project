@@ -1,0 +1,279 @@
+:root {
+	/* Color variables*/
+	--green-bg-color: #F6FFF6;
+	--green-border-color: #E6EFE6;
+	--green-text-color: #0A0D;
+
+	--red-bg-color: #FFF6F6;
+	--red-border-color: #EFE6E6;
+	--red-text-color: #A00D;
+
+	--blue-bg-color: #F6F6FF;
+	--blue-border-color: #E6E6EF;
+	--blue-text-color: #00CD;
+
+	--yellow-bg-color: #FFFFF6;
+	--yellow-border-color: #EFEFE6;
+	--yellow-text-color: #AA0D;
+
+	--purple-bg-color: #FFF6FF;
+	--purple-border-color: #F6E6EF;
+	--purple-text-color: #80AD;
+
+	--cyan-bg-color: #F6FFFF;
+	--cyan-border-color: #E6EFEF;
+	--cyan-text-color: #0AAD;
+}
+
+#app, #root {
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+html,
+body {
+	height: 100%;
+	margin: 0;
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+	font-family: Roboto;
+	font-size: 1.1em;
+	overflow: hidden;
+}
+
+.view {
+	flex: 1;
+	margin: 0.5em 1em;
+}
+
+.header {
+	flex-shrink: 0;
+	align-items: center;
+	background-color: #FFFFFF;
+	box-shadow: 0px 1px 1px #4EA13F;
+	display: flex;
+	margin-bottom: 2px;
+	padding: 0.5em;
+}
+
+.header-logo {
+	width: 9em;
+	padding: 0em 0.2em;
+}
+
+.header-text {
+	color: #2E2E2E;
+	font-size: 2.0em;
+	margin: 0;
+	padding: 0em 1em;
+}
+
+.content {
+	display: flex;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.nav-bar {
+	background-color: #F6F6F6;
+	border-right: solid #f0f0f0 1px;
+	box-shadow: 1px 0px 2px #0005;
+	padding: 0.1em;
+}
+
+.nav-item {
+	background-color: #F2F4F7;
+	border: solid #C2C4C7 1px;
+	border-radius: 4px;
+	box-shadow: 1px 1px 2px #0002;
+	color: #555555;
+	font-size: 1.2em;
+	margin: 0.2em;
+	min-width: 7em;
+	padding: 0.3em;
+	padding-right: 0.6em;
+}
+
+.nav-item:hover {
+	background-color: #E4E7EB;
+	color: #2E2E2E;
+}
+
+.nav-item.active {
+	background-color: #4EA13F;
+	border: solid #5A5 1px;
+	border-radius: 4px;
+	box-shadow: 1px 1px 2px #0002;
+	color: white;
+	font-size: 1.2em;
+	margin: 0.2em;
+	padding: 0.3em;
+	padding-right: 0.6em;
+}
+
+.nav-link {
+	font-size: 0.8em;
+}
+
+.main-panel {
+	background-color: #FEFEFF;
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	overflow-y: auto;
+	min-height: 0;
+}
+
+.work-panel {
+	margin: 0.8em 2em 0em 0.8em;
+	/* T R B L */
+}
+
+.work-panel-title {
+	color: #2E2E2E;
+	font-size: 2.0em;
+	margin: 0;
+	padding-bottom: 0.5em;
+}
+
+.dash-row {
+	display: flex;
+	flex-direction: row;
+	gap: 1em;
+	justify-content: space-between;
+	width: 100%;
+}
+
+.dash-row-item {
+	border: solid #EEE6 1px;
+	border-radius: 16px;
+	box-shadow: 1px 1px 2px #0001;
+	padding: 1em;
+	width: 30%;
+}
+
+.dash-row-item-content {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5em;
+}
+
+.dash-row-item-img {
+	width: 4em;
+	border-radius: 3em;
+	height: 4em;
+	padding: 0.2em;
+	margin-right: 0.5em;
+	border: solid grey 1px;
+	background: white;
+}
+
+.dash-row-item-name {
+	font-weight: 600;
+}
+
+.dash-row-item-counter {
+	color: #1119;
+	font-size: 3em;
+	font-weight: 500;
+}
+
+.dash-list {}
+
+.dash-list-item {}
+
+#dash-box-1 {
+	background-color: var(--green-bg-color);
+	border-color: var(--green-border-color);
+}
+
+#dash-box-1 .dash-row-item-name {
+	color: var(--green-text-color);
+}
+
+#dash-box-2 {
+	background-color: var(--red-bg-color);
+	border-color: var(--red-border-color);
+}
+
+#dash-box-2 .dash-row-item-name {
+	color: var(--red-text-color);
+}
+
+#dash-box-3 {
+	background-color: var(--yellow-bg-color);
+	border-color: var(--yellow-border-color);
+}
+
+#dash-box-3 .dash-row-item-name {
+	color: var(--yellow-text-color);
+}
+
+#dash-box-4 {
+	background-color: var(--purple-bg-color);
+	border-color: var(--purple-border-color);
+}
+
+#dash-box-4 .dash-row-item-name {
+	color: var(--purple-text-color);
+}
+
+#dash-box-5 {
+	background-color: var(--blue-bg-color);
+	border-color: var(--blue-border-color);
+}
+
+#dash-box-5 .dash-row-item-name {
+	color: var(--blue-text-color);
+}
+
+footer {
+	color: #0005;
+	font-size: 0.7em;
+	padding: 0.5em;
+	text-align: center;
+}
+
+.table-container {
+	border: solid #0002 1px;
+	border-radius: 5px;
+}
+
+table {
+	border-collapse: collapse;
+	border-radius: 6px;
+	overflow: hidden;
+	font-size: 0.8em;
+}
+
+tbody tr:hover {
+	background-color: var(--green-border-color);
+}
+
+th {
+	background-color: #0001;
+	border-bottom: solid #0002 1px;
+	padding: 0.2em 0.3em;
+}
+
+td {
+	border-bottom: solid #0002 1px;
+	padding: 0.7em 0.3em;
+}
+
+tbody tr:last-child td {
+	border-bottom: none;
+}
+
+.insp-row {
+	display: flex;
+	flex-direction: row;
+	justify-content: stretch;
+	gap: 1em;
+	width: 100%;
+}
