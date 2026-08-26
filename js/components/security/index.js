@@ -1,29 +1,45 @@
 export const title = "KLA W32 - Havenveiligheid";
 
-function highlightActiveNav(root) {
-  const currentRoute = location.hash;
+const subTitles = {
+	"#/security": "Dashboard",
+	"#/security/": "Dashboard",
+	"#/security/index": "Dashboard",
+	"#/security/inspections": "Inspecties",
+	"#/security/deviations": "Afwijkingen",
+	"#/security/actions": "Maatregelen",
+	"#/security/verifications": "Opvolging",
+	"#/security/reports": "Rapporten"
+};
 
-  root.querySelectorAll(".nav-item").forEach(item => {
-    item.classList.toggle(
-      "active",
-      item.dataset.route === currentRoute
-    );
-  });
+function highlightActiveNav(root) {
+	const currentRoute = location.hash;
+
+	const span = root.querySelector("#header-sub");
+	span.innerHTML = subTitles[currentRoute];
+
+	root.querySelectorAll(".nav-item").forEach(item => {
+		item.classList.toggle(
+			"active",
+			item.dataset.route === currentRoute
+		);
+	});
 }
 
 export function render(id) {
-  return `
+	return `
     <div class="header">
 	    <img class="header-logo" src="img/kd_logo_full.svg" />
-	    <h1 class="header-text">Port Facility Security Planning<br>Manager</h1>
+	    <h1 class="header-text">Port Facility Security Plan<br>
+		  <span id="header-sub" style="font-size:0.8em;"></span>
+		</h1>
 	  </div>
 	  <div class="content">
 	    <div class="nav-bar">
 	      <div id="nav-dashboard-btn" class="nav-item active" data-route="#/security/">Dashboard</div>
 	      <div id="nav-inspections-btn" class="nav-item" data-route="#/security/inspections">Inspecties</div>
-	      <div id="nav-deviations-btn" class="nav-item" data-route="#/security/deviations">Bevindingen</div>
+	      <div id="nav-deviations-btn" class="nav-item" data-route="#/security/deviations">Afwijkingen</div>
 	      <div id="nav-actions-btn" class="nav-item" data-route="#/security/actions">Maatregelen</div>
-	      <div id="nav-verifications-btn" class="nav-item" data-route="#/security/verifications">Verificaties</div>
+	      <div id="nav-verifications-btn" class="nav-item" data-route="#/security/verifications">Opvolging</div>
 		    <div id="nav-reports-btn" class="nav-item" data-route="#/security/reports">Rapporten</div>
 	    </div>
 	    <div class="main-panel">
@@ -45,7 +61,7 @@ export function render(id) {
 			        <div class="dash-row-item-content">
 			          <div class="dash-row-item-img"></div>
 			          <div>
-				          <span class="dash-row-item-name">Open<br>Bevindingen</span>
+				          <span class="dash-row-item-name">Open<br>Afwijkingen</span>
 				          <br>
 				          <span class="dash-row-item-counter">0</span>
 				        </div>
@@ -67,7 +83,7 @@ export function render(id) {
 			        <div class="dash-row-item-content">
 			          <div class="dash-row-item-img"></div>
 			          <div>
-			  	        <span class="dash-row-item-name">Open<br>Verificaties</span>
+			  	        <span class="dash-row-item-name">Op te volgen<br>Maatregelen</span>
 		  		        <br>
 		  		        <span class="dash-row-item-counter">0</span>
 		  		      </div>
@@ -78,7 +94,7 @@ export function render(id) {
 	  		      <div class="dash-row-item-content">
   			        <div class="dash-row-item-img"></div>
 			          <div>
-				          <span class="dash-row-item-name">Afgesloten<br>Bevindingen</span>
+				          <span class="dash-row-item-name">Afgesloten<br>Afwijkingen</span>
 				          <br>
 				          <span class="dash-row-item-counter">0</span>
 				        </div>
@@ -117,15 +133,20 @@ export function render(id) {
 }
 
 export function init(root, id) {
-  root.querySelectorAll(".nav-item").forEach(item => {
-    item.onclick = () => {
-      window.location.hash = item.dataset.route;
-    }
-  });
+	root.querySelectorAll(".nav-item").forEach(item => {
+		item.onclick = () => {
+			window.location.hash = item.dataset.route;
+		}
+	});
 
-  window.addEventListener("hashchange", () => {
-    highlightActiveNav(root);
-  });
+	window.addEventListener("hashchange", () => {
+		highlightActiveNav(root);
+	});
+
+	const currentRoute = location.hash;
+
+	const span = root.querySelector("#header-sub");
+	span.innerHTML = subTitles[currentRoute];
 }
 
 export function destroy() {

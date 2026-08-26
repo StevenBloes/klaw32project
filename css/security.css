@@ -238,3 +238,42 @@ footer {
 	padding: 0.5em;
 	text-align: center;
 }
+
+.table-container {
+	border: solid #0002 1px;
+	border-radius: 5px;
+}
+
+table {
+	border-collapse: collapse;
+	border-radius: 6px;
+	overflow: hidden;
+	font-size: 0.8em;
+}
+
+tbody tr:hover {
+	background-color: var(--green-border-color);
+}
+
+th {
+	background-color: #0001;
+	border-bottom: solid #0002 1px;
+	padding: 0.2em 0.3em;
+}
+
+td {
+	border-bottom: solid #0002 1px;
+	padding: 0.7em 0.3em;
+}
+
+tbody tr:last-child td {
+	border-bottom: none;
+}
+
+.insp-row {
+	display: flex;
+	flex-direction: row;
+	justify-content: stretch;
+	gap: 1em;
+	width: 100%;
+}
