@@ -25,7 +25,8 @@
 	--cyan-text-color: #0AAD;
 }
 
-#app, #root {
+#app,
+#root {
 	height: 100vh;
 	display: flex;
 	flex-direction: column;
@@ -136,7 +137,7 @@ body {
 
 .work-panel-title {
 	color: #2E2E2E;
-	font-size: 2.0em;
+	font-size: 1.5em;
 	margin: 0;
 	padding-bottom: 0.5em;
 }
@@ -248,32 +249,130 @@ table {
 	border-collapse: collapse;
 	border-radius: 6px;
 	overflow: hidden;
-	font-size: 0.8em;
+	font-size: 0.9em;
+	width: 100%;
 }
 
-tbody tr:hover {
+#inspection_tbl tr:hover {
 	background-color: var(--green-border-color);
+}
+
+.numeric-column {
+	text-align: center;
 }
 
 th {
 	background-color: #0001;
 	border-bottom: solid #0002 1px;
-	padding: 0.2em 0.3em;
+	padding: 0.2em 0.7em;
+	text-align: left;
+	white-space: nowrap
 }
 
 td {
 	border-bottom: solid #0002 1px;
-	padding: 0.7em 0.3em;
+	padding: 0.2em 0.7em;
+	white-space: nowrap
 }
 
 tbody tr:last-child td {
 	border-bottom: none;
 }
 
+#inspection-tbl th,
+#inspection-tbl td {
+	padding: 0.7em 0.7em;
+}
+
 .insp-row {
 	display: flex;
 	flex-direction: row;
 	justify-content: stretch;
-	gap: 1em;
+	gap: 2em;
 	width: 100%;
+}
+
+.insp-col1 {
+	padding-right: 2em;
+	border-right: solid #4EA13F 1px;
+}
+
+.bold-red-txt {
+	color: red;
+	font-weight: 600;
+}
+
+.bold-green-txt {
+	color: var(--green-text-color);
+	font-weight: 600;
+}
+
+.input-fields {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	gap: 2em;
+	margin-bottom: 0.3em;
+}
+
+.field {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	padding-bottom: 0.2em;
+}
+
+label {
+	display: inline-block;
+	font-size: 0.9em;
+	font-weight: 600;
+}
+
+textarea {
+	display: inline-block;
+	width: 100%;
+}
+
+.view-mode input,
+.view-mode select,
+.view-mode textarea {
+	width: 50%;
+	border: 1px solid #FFF0;
+	border-radius: none;
+	padding: 8px 12px;
+	background: none;
+	
+}
+
+.view-mode input:focus,
+.view-mode textarea:focus {
+	border-color: none;
+	box-shadow: none;
+	outline: none;
+}
+
+.view-mode textarea {
+	width: 100%;
+}
+
+.edit-mode input,
+.edit-mode select,
+.edit-mode textarea {
+	width: 50%;
+	border: 1px solid #d1d5db;
+	border-radius: 6px;
+	padding: 8px 12px;
+	background: #fefefe;
+	
+}
+
+.edit-mode textarea {
+	width: 100%;
+}
+
+.edit-mode input:focus,
+.edit-mode textarea:focus {
+	border-color: #4ea13f;
+	box-shadow: 0 0 3px #4EA13F;
+	outline: none;
 }

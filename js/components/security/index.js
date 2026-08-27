@@ -35,7 +35,7 @@ export function render(id) {
 	  </div>
 	  <div class="content">
 	    <div class="nav-bar">
-	      <div id="nav-dashboard-btn" class="nav-item active" data-route="#/security/">Dashboard</div>
+	      <div id="nav-dashboard-btn" class="nav-item" data-route="#/security/">Dashboard</div>
 	      <div id="nav-inspections-btn" class="nav-item" data-route="#/security/inspections">Inspecties</div>
 	      <div id="nav-deviations-btn" class="nav-item" data-route="#/security/deviations">Afwijkingen</div>
 	      <div id="nav-actions-btn" class="nav-item" data-route="#/security/actions">Maatregelen</div>
@@ -143,10 +143,8 @@ export function init(root, id) {
 		highlightActiveNav(root);
 	});
 
-	const currentRoute = location.hash;
-
-	const span = root.querySelector("#header-sub");
-	span.innerHTML = subTitles[currentRoute];
+	/* needs to run here when reloading page with child */
+	highlightActiveNav(root);
 }
 
 export function destroy() {

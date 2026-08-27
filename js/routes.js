@@ -5,8 +5,8 @@ let currentCss = null;
 let currentCssFile = null;
 
 const routes = {
-  "#/": { 
-    component: "home", 
+  "#/": {
+    component: "home",
     css: "styles.css"
   },
 
@@ -35,14 +35,14 @@ const routes = {
     children: {
       "inspections": "security/inspections",
       "deviations": "security/deviations",
-	    "actions": "security/actions",
-	    "verifications": "security/verifications",
-	    "reports": "security/reports"
+      "actions": "security/actions",
+      "verifications": "security/verifications",
+      "reports": "security/reports"
     }
   }
 };
 
-export function handleRoute() {
+export async function handleRoute() {
   const hash = window.location.hash || "#/";
   const parts = hash.split("/").filter(Boolean); // ["#", "products", "phones"]
 
@@ -56,17 +56,17 @@ export function handleRoute() {
 
   setRouteCss(route.css);
 
-  if(currentBaseRoute !== base){
+  if (currentBaseRoute !== base) {
     currentBaseRoute = base;
-    loadComponent(route.component);
+    await loadComponent(route.component);
   } else {
-    if(typeof(child) === "undefined"){
-      loadComponent(route.component);
+    if (typeof (child) === "undefined") {
+      await loadComponent(route.component);
     }
   }
 
   if (child && route.children && route.children[child]) {
-    loadChildComponent(route.children[child], param);
+    await loadChildComponent(route.children[child], param);
   }
 }
 
@@ -114,13 +114,13 @@ function setRouteCss(cssFile) {
   } else {
     currentCssFile = cssFile;
   }
-  
+
   if (currentCss) {
     currentCss.remove();
     currentCss = null;
   }
 
-  if (!cssFile){
+  if (!cssFile) {
     return;
   }
 
