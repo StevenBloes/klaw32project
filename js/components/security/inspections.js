@@ -46,7 +46,7 @@ const SAMPLE_DATA = [
   }
 ];
 
-const table_columns = ["id", ["date", "time"], "type", "location", "executedBy", "deviationCount", "status"];
+const table_columns = ["id", "securityLevel", "date", "type", "location", "executedBy", "deviationCount", "status"];
 
 
 function loadData(root) {
@@ -78,6 +78,8 @@ function loadData(root) {
         } else {
           cell.classList.add("bold-green-txt", "numeric-column");
         }
+      } else if (column === "securityLevel") {
+          cell.classList.add("numeric-column");
       }
 
 
@@ -93,7 +95,7 @@ function loadDetail(root, id) {
     return;
   }
 
-  root.querySelector("#detail-title").innerHTML = `INS_${String(id).padStart(3, "0")} - Inspectie Details`;
+  root.querySelector("#detail-title").innerHTML = `INS_${String(id).padStart(3, "0")} - Inspectie Rapport`;
 
   root.querySelector("#detail-id").value = `INS_${String(id).padStart(3, "0")}`;
   root.querySelector("#detail-type").value = SAMPLE_DATA.filter((key) => key.id === id)[0].type;
@@ -123,18 +125,22 @@ export function render(id) {
   return `
     <div class="insp-row">
     <div class="insp-col1">
-    <h3 class="work-panel-title">Uitgevoerde Inspecties</h3>
+    <div style="display: flex; justify-content: space-between;">
+      <h3 class="work-panel-title">Uitgevoerde Inspecties</h3>
+      <button class="new-btn">+ Nieuwe Inspectie</button>
+    </div>
     <div>filters</div>
     <div class="table-container">
     <table id="inspection-tbl">
       <thead>
         <tr>
           <th>ID</th>
+          <th class="numeric-column">SL</th>
           <th>Datum</th>
           <th>Type</th>
           <th>Plaats</th>
           <th>Uitgevoerd door</th>
-          <th class="numeric-column">Bevindingen</th>
+          <th class="numeric-column">Afwijkingen</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -144,7 +150,7 @@ export function render(id) {
     </div>
     </div>
     <div id="input-form" class="view-mode">
-      <h3 id="detail-title" class="work-panel-title">Inspectie Details</h3>
+      <h3 id="detail-title" class="work-panel-title">Inspectie Rapport</h3>
       <div class="input-fields">
         <div class="field-column">
           <div class="field">
@@ -193,6 +199,7 @@ export function render(id) {
           <thead>
             <tr>
               <th>#</th>
+              <th class="numeric-column">SL</th>
               <th>Checkpoint</th>
               <th class="numeric-column">Result</th>
               <th>Remarks</th>
@@ -201,18 +208,21 @@ export function render(id) {
           <tbody id="checkpoint-tbl">
             <tr>
               <td>1</td>
+              <td class="numeric-column">1</td>
               <td>Perimeter hek intact</td>
               <td class="numeric-column bold-green-txt">OK</td>
               <td>-</td>            
             </tr>
             <tr>
               <td>2</td>
+              <td class="numeric-column">1</td>
               <td>Logboek bezoeker compleet</td>
               <td class="numeric-column bold-red-txt">NOK</td>
               <td>Chauffeur niet aangemeld</td>            
             </tr>
             <tr>
               <td>3</td>
+              <td class="numeric-column">1</td>
               <td>Signalisatie goed zichtbaar</td>
               <td class="numeric-column bold-green-txt">OK</td>
               <td>-</td>            
@@ -227,13 +237,13 @@ export function render(id) {
             <tr>
               <th>ID</th>
               <th>Omschrijving</th>
-              <th>Prioriteit</th>
+              <th>Risico</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody id="deviation-tbl">
             <tr>
-              <td>FIN_0001</td>
+              <td>AFW_0001</td>
               <td>Chauffeur niet aangemeld</td>
               <td>Medium</td>
               <td>Open</td>
@@ -241,7 +251,13 @@ export function render(id) {
           </tbody>
         </table>
       </div>
-      <div style="margin: 2em 0em;"><button id="mode-btn">Wijzigen</button></div>
+      <div style="margin: 2em 0em; display: flex; justify-content: space-between;">
+        <div>
+          <button id="mode-btn" class="action-btn">Wijzigen</button>
+          <button id="print-btn" class="action-btn">Print</button>
+        </div>
+        <button class="new-btn">+ Nieuwe Afwijking</button>
+      </div>
     </div>
     </div>
     

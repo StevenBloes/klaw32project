@@ -293,8 +293,13 @@ tbody tr:last-child td {
 }
 
 .insp-col1 {
+	padding-top: 1em;
 	padding-right: 2em;
 	border-right: solid #4EA13F 1px;
+}
+
+#input-form {
+	padding-top: 1em;
 }
 
 .bold-red-txt {
@@ -341,7 +346,7 @@ textarea {
 	border-radius: none;
 	padding: 8px 12px;
 	background: none;
-	
+	resize: none;
 }
 
 .view-mode input:focus,
@@ -375,4 +380,43 @@ textarea {
 	border-color: #4ea13f;
 	box-shadow: 0 0 3px #4EA13F;
 	outline: none;
+}
+
+.new-btn {
+	background-color: #4EA13F;
+	border: solid #5A5 1px;
+	border-radius: 4px;
+	box-shadow: 1px 1px 2px #0002;
+	color: white;
+	font-size: 1.0em;
+	padding: 0.3em;
+	padding-right: 0.6em;
+}
+
+.new-btn:hover {
+	background-color: #392;
+}
+
+.new-btn:active {
+	background-color: #181;
+	border-color: #171;
+}
+
+.action-btn {
+	background-color: #56E;
+	border: solid #46E 1px;
+	border-radius: 4px;
+	box-shadow: 1px 1px 2px #0002;
+	color: white;
+	font-size: 1.0em;
+	padding: 0.3em 0.6em;
+}
+
+.action-btn:hover {
+	background-color: #45D;
+}
+
+.action-btn:active {
+	background-color: #24C;
+	border-color: #23A;
 }
