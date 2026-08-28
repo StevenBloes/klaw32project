@@ -18,7 +18,31 @@ const SAMPLE_DATA = [
     deviationCount: 1,
     securityLevel: 1,
     status: "Voltooid",
-    remarks: "Dagelijkse rondgang, controle productie."
+    remarks: "Dagelijkse rondgang, controle productie.",
+    checkItems:[
+      {
+        id: 1,
+        checkpointId: 1,
+        securityLevel: 1,
+        description: "Perimeter hek intact",
+        result: 1,
+        remarks: "-"
+      }, {
+        id: 1,
+        checkpointId: 2,
+        securityLevel: 1,
+        description: "Logboek bezoekers compleet",
+        result: 0,
+        remarks: "Chauffeur niet aangemeld"
+      }, {
+        id: 1,
+        checkpointId: 3,
+        securityLevel: 1,
+        description: "Signalisatie goed zichtbaar",
+        result: 1,
+        remarks: "-"
+      }
+    ]
   }, {
     id: 2,
     type: "Wekelijks",
@@ -30,7 +54,31 @@ const SAMPLE_DATA = [
     deviationCount: 2,
     securityLevel: 1,
     status: "Voltooid",
-    remarks: "Wekelijkse rondgang, uitgebreide controle van de toegangscontrole."
+    remarks: "Wekelijkse rondgang, uitgebreide controle van de toegangscontrole.",
+    checkItems:[
+      {
+        id: 1,
+        checkpointId: 1,
+        securityLevel: 1,
+        description: "Perimeter hek intact",
+        result: 1,
+        remarks: "-"
+      }, {
+        id: 1,
+        checkpointId: 2,
+        securityLevel: 1,
+        description: "Logboek bezoekers compleet",
+        result: 0,
+        remarks: "Chauffeur niet aangemeld"
+      }, {
+        id: 1,
+        checkpointId: 3,
+        securityLevel: 1,
+        description: "Signalisatie goed zichtbaar",
+        result: 0,
+        remarks: "Pallet voor signalisatie geplaatst"
+      }
+    ]
   }, {
     id: 3,
     type: "Dagelijks",
@@ -42,11 +90,36 @@ const SAMPLE_DATA = [
     deviationCount: 0,
     securityLevel: 1,
     status: "Voltooid",
-    remarks: "Dagelijkse rondgang door productie."
+    remarks: "Dagelijkse rondgang door productie.",
+    checkItems:[
+      {
+        id: 1,
+        checkpointId: 1,
+        securityLevel: 1,
+        description: "Perimeter hek intact",
+        result: 1,
+        remarks: "-"
+      }, {
+        id: 1,
+        checkpointId: 2,
+        securityLevel: 1,
+        description: "Logboek bezoekers compleet",
+        result: 1,
+        remarks: "-"
+      }, {
+        id: 1,
+        checkpointId: 3,
+        securityLevel: 1,
+        description: "Signalisatie goed zichtbaar",
+        result: 1,
+        remarks: "-"
+      }
+    ]
   }
 ];
 
 const table_columns = ["id", "securityLevel", "date", "type", "location", "executedBy", "deviationCount", "status"];
+const checkpoint_tbl_cols = ["checkpointID", "securityLevel", "description", "result", "remarks"];
 
 
 function loadData(root) {
@@ -106,6 +179,10 @@ function loadDetail(root, id) {
   root.querySelector("#detail-function").value = SAMPLE_DATA.filter((key) => key.id === id)[0].function;
   root.querySelector("#detail-security-level").value = SAMPLE_DATA.filter((key) => key.id === id)[0].securityLevel;
   root.querySelector("#detail-remarks").value = SAMPLE_DATA.filter((key) => key.id === id)[0].remarks;
+
+  console.log(SAMPLE_DATA.filter((key) => key.id === id)[0].checkItems);
+
+  SAMPLE_DATA.filter((key) => key.id === id)[0].checkItems.forEach(item => {});
 }
 
 function changeMode(mode){
