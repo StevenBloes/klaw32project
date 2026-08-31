@@ -368,7 +368,7 @@ textarea {
 	border-radius: 6px;
 	padding: 8px 12px;
 	background: #fefefe;
-	
+
 }
 
 .edit-mode textarea {
@@ -419,4 +419,74 @@ textarea {
 .action-btn:active {
 	background-color: #24C;
 	border-color: #23A;
+}
+
+/*
+	result/status/progress classes for tables
+*/
+
+.result-ok {
+	font-size: 0.9em;
+	font-weight: 600;
+	color: var(--green-text-color);
+}
+
+.result-nok {
+	font-size: 0.9em;
+	font-weight: 600;
+	color: red;
+}
+
+.status-open {
+	font-size: 0.9em;
+	padding: 0.1em 0.3em;
+	border-radius: 4px;
+	color: #444;
+	background-color: #4444;
+}
+
+.status-progress,
+.status-verify {
+	font-size: 0.9em;
+	padding: 0.1em 0.3em;
+	border-radius: 4px;
+	color: #00F;
+	background-color: #00F3;
+}
+
+.severity-low,
+.status-closed {
+	font-size: 0.9em;
+	padding: 0.1em 0.3em;
+	border-radius: 4px;
+	color: #090;
+	background-color: #0A03;
+}
+
+.severity-medium {
+	font-size: 0.9em;
+	padding: 0.1em 0.3em;
+	border-radius: 4px;
+	color: #F80;
+	background-color: #F804;
+}
+
+.severity-high {
+	font-size: 0.9em;
+	padding: 0.1em 0.3em;
+	border-radius: 4px;
+	color: #F00;
+	background-color: #F004;
+}
+
+.security-level-1 {
+	
+}
+
+.security-level-2 {
+	
+}
+
+.security-level-3 {
+	
 }

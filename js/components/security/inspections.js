@@ -6,6 +6,8 @@ const EDITMODE = 2;
 
 let MODE = 0;
 
+const formatId = (prefix, value) => `${prefix}_${String(value).padStart(3, "0")}`;
+
 const SAMPLE_DATA = [
   {
     id: 1,
@@ -19,7 +21,7 @@ const SAMPLE_DATA = [
     securityLevel: 1,
     status: "Voltooid",
     remarks: "Dagelijkse rondgang, controle productie.",
-    checkItems:[
+    checkItems: [
       {
         id: 1,
         checkpointId: 1,
@@ -42,6 +44,14 @@ const SAMPLE_DATA = [
         result: 1,
         remarks: "-"
       }
+    ],
+    deviations: [
+      {
+        deviationId: 1,
+        description: "Chauffeur niet aangemeld",
+        severity: "MEDIUM",
+        status: "ACTION_ASSIGNED"
+      }
     ]
   }, {
     id: 2,
@@ -55,7 +65,7 @@ const SAMPLE_DATA = [
     securityLevel: 1,
     status: "Voltooid",
     remarks: "Wekelijkse rondgang, uitgebreide controle van de toegangscontrole.",
-    checkItems:[
+    checkItems: [
       {
         id: 1,
         checkpointId: 1,
@@ -78,6 +88,24 @@ const SAMPLE_DATA = [
         result: 0,
         remarks: "Pallet voor signalisatie geplaatst"
       }
+    ],
+    deviations: [
+      {
+        deviationId: 2,
+        description: "Onbekend persoon waargenomen in productiehal",
+        severity: "HIGH",
+        status: "OPEN"
+      }, {
+        deviationId: 3,
+        description: "Chauffeur niet aangemeld",
+        severity: "MEDIUM",
+        status: "ACTION_ASSIGNED"
+      }, {
+        deviationId: 4,
+        description: "Pallet voor signalisatie geplaatst",
+        severity: "LOW",
+        status: "CLOSED"
+      }
     ]
   }, {
     id: 3,
@@ -91,7 +119,7 @@ const SAMPLE_DATA = [
     securityLevel: 1,
     status: "Voltooid",
     remarks: "Dagelijkse rondgang door productie.",
-    checkItems:[
+    checkItems: [
       {
         id: 1,
         checkpointId: 1,
@@ -114,12 +142,48 @@ const SAMPLE_DATA = [
         result: 1,
         remarks: "-"
       }
-    ]
+    ],
+    deviations: []
   }
 ];
 
+const maps = {
+  securityLevel: {
+    1: { text: "Niveau 1", css: "security-level-1" },
+    2: { text: "Niveau 2", css: "security-level-2" },
+    3: { text: "Niveau 3", css: "security-level-3" },
+  },
+  status: {
+    OPEN: { text: "Open", css: "status-open" },
+    ACTION_ASSIGNED: { text: "In behandeling", css: "status-progress" },
+    AWAITING_VERIFICATION: { text: "In behandeling", css: "status-verify" },
+    CLOSED: { text: "Afgesloten", css: "status-closed" }
+  },
+  severity: {
+    LOW: { text: "Laag", css: "severity-low" },
+    MEDIUM: { text: "Medium", css: "severity-medium" },
+    HIGH: { text: "Hoog", css: "severity-high" }
+  },
+  checkResult: {
+    0: { text: "NOK", css: "result-nok" },
+    1: { text: "OK", css: "result-ok" }
+  }
+}
+
 const table_columns = ["id", "securityLevel", "date", "type", "location", "executedBy", "deviationCount", "status"];
-const checkpoint_tbl_cols = ["checkpointID", "securityLevel", "description", "result", "remarks"];
+const checkpoint_tbl_cols = [
+  { field: "checkpointId", cellcss: "numeric-column" },
+  { field: "securityLevel", cellcss: "numeric-column" },
+  { field: "description" },
+  { field: "result", cellcss: "numeric-column", map: "checkResult" },
+  { field: "remarks" }
+];
+const deviation_tbl_cols = [
+  { field: "deviationId", title: "ID", formatter: value => formatId("AFW", value) },
+  { field: "description", title: "Omschrijving" },
+  { field: "severity", title: "Risico", map: "severity" },
+  { field: "status", title: "Status", map: "status" }
+];
 
 
 function loadData(root) {
@@ -151,10 +215,9 @@ function loadData(root) {
         } else {
           cell.classList.add("bold-green-txt", "numeric-column");
         }
-      } else if (column === "securityLevel") {
-          cell.classList.add("numeric-column");
+      } else if (column === "checkpointId" || column === "securityLevel") {
+        cell.classList.add("numeric-column");
       }
-
 
       row.appendChild(cell);
     });
@@ -168,9 +231,9 @@ function loadDetail(root, id) {
     return;
   }
 
-  root.querySelector("#detail-title").innerHTML = `INS_${String(id).padStart(3, "0")} - Inspectie Rapport`;
+  root.querySelector("#detail-title").innerHTML = `${formatId("INS", id)} - Inspectie Rapport`;
 
-  root.querySelector("#detail-id").value = `INS_${String(id).padStart(3, "0")}`;
+  root.querySelector("#detail-id").value = `${formatId("INS", id)}`;
   root.querySelector("#detail-type").value = SAMPLE_DATA.filter((key) => key.id === id)[0].type;
   root.querySelector("#detail-date").value = SAMPLE_DATA.filter((key) => key.id === id)[0].date;
   root.querySelector("#detail-time").value = SAMPLE_DATA.filter((key) => key.id === id)[0].time;
@@ -180,12 +243,66 @@ function loadDetail(root, id) {
   root.querySelector("#detail-security-level").value = SAMPLE_DATA.filter((key) => key.id === id)[0].securityLevel;
   root.querySelector("#detail-remarks").value = SAMPLE_DATA.filter((key) => key.id === id)[0].remarks;
 
-  console.log(SAMPLE_DATA.filter((key) => key.id === id)[0].checkItems);
+  const checkpointTable = root.querySelector("#checkpoint-tbl");
+  checkpointTable.innerHTML = "";
 
-  SAMPLE_DATA.filter((key) => key.id === id)[0].checkItems.forEach(item => {});
+  SAMPLE_DATA.filter((key) => key.id === id)[0].checkItems.forEach(item => {
+    const row = document.createElement("tr");
+    checkpoint_tbl_cols.forEach(column => {
+      
+      const cell = document.createElement("td");
+      
+      if(column.cellcss){
+        cell.classList.add(column.cellcss);
+      }
+
+      if(column.map){
+        const mapItem = maps[column.map][item[column.field]];
+        cell.textContent = mapItem.text;
+        cell.classList.add(mapItem.css);
+      } else {
+        cell.textContent = item[column.field];
+      }      
+
+      row.appendChild(cell);
+    })
+
+    checkpointTable.appendChild(row);
+  });
+
+
+
+  // insert deviations
+  root.querySelector("#deviationCounter").textContent = SAMPLE_DATA.filter((key) => key.id === id)[0].deviations.length;
+
+  const deviationTable = root.querySelector("#deviation-tbl");
+  deviationTable.innerHTML = "";
+
+  SAMPLE_DATA.filter((key) => key.id === id)[0].deviations.forEach(deviation => {
+    const row = document.createElement("tr");
+    deviation_tbl_cols.forEach(column => {
+      const cell = document.createElement("td");
+      if (column.map) {
+        const mapItem = maps[column.map][deviation[column.field]];
+        const span = document.createElement("span");
+        span.textContent = mapItem.text;
+        span.classList.add(mapItem.css);
+        cell.appendChild(span);
+      } else {
+        let value = deviation[column.field];
+        if (column.formatter) {
+          value = column.formatter(value);
+        }
+        cell.textContent = value;
+      }
+      row.appendChild(cell);
+    });
+
+    deviationTable.appendChild(row);
+  });
 }
 
-function changeMode(mode){
+function changeMode(mode) {
   MODE = mode;
 
   const inputForm = document.querySelector("#input-form");
@@ -195,7 +312,7 @@ function changeMode(mode){
   inputForm.classList.toggle("edit-mode", MODE === EDITMODE);
   inputForm.classList.toggle("view-mode", MODE !== EDITMODE);
 
-  inputForm.querySelectorAll("input, textarea").forEach(el => el.readOnly = (MODE === VIEWMODE ));
+  inputForm.querySelectorAll("input, textarea").forEach(el => el.readOnly = (MODE === VIEWMODE));
 }
 
 export function render(id) {
@@ -278,36 +395,14 @@ export function render(id) {
               <th>#</th>
               <th class="numeric-column">SL</th>
               <th>Checkpoint</th>
-              <th class="numeric-column">Result</th>
-              <th>Remarks</th>
+              <th class="numeric-column">Resultaat</th>
+              <th>Opmerking</th>
             </tr>
           </thead>
-          <tbody id="checkpoint-tbl">
-            <tr>
-              <td>1</td>
-              <td class="numeric-column">1</td>
-              <td>Perimeter hek intact</td>
-              <td class="numeric-column bold-green-txt">OK</td>
-              <td>-</td>            
-            </tr>
-            <tr>
-              <td>2</td>
-              <td class="numeric-column">1</td>
-              <td>Logboek bezoeker compleet</td>
-              <td class="numeric-column bold-red-txt">NOK</td>
-              <td>Chauffeur niet aangemeld</td>            
-            </tr>
-            <tr>
-              <td>3</td>
-              <td class="numeric-column">1</td>
-              <td>Signalisatie goed zichtbaar</td>
-              <td class="numeric-column bold-green-txt">OK</td>
-              <td>-</td>            
-            </tr>
-          </tbody>
+          <tbody id="checkpoint-tbl"></tbody>
         </table>
       </div>
-      <h4>Waargenomen Afwijkingen (1)</h4>
+      <h4>Waargenomen Afwijkingen (<span id="deviationCounter"></span>)</h4>
       <div class="table-container">
         <table>
           <thead>
@@ -318,14 +413,7 @@ export function render(id) {
               <th>Status</th>
             </tr>
           </thead>
-          <tbody id="deviation-tbl">
-            <tr>
-              <td>AFW_0001</td>
-              <td>Chauffeur niet aangemeld</td>
-              <td>Medium</td>
-              <td>Open</td>
-            </tr>
-          </tbody>
+          <tbody id="deviation-tbl"></tbody>
         </table>
       </div>
       <div style="margin: 2em 0em; display: flex; justify-content: space-between;">
@@ -345,10 +433,10 @@ export function init(root, id) {
   loadData(root);
 
   const inputForm = root.querySelector("#input-form");
-  inputForm.querySelectorAll("input, textarea").forEach(el => el.readOnly = (MODE === VIEWMODE ));
+  inputForm.querySelectorAll("input, textarea").forEach(el => el.readOnly = (MODE === VIEWMODE));
 
   root.querySelector("#mode-btn").onclick = () => {
-    if ( MODE === EDITMODE ) {
+    if (MODE === EDITMODE) {
       changeMode(VIEWMODE);
     } else if (MODE === VIEWMODE) {
       changeMode(EDITMODE);
