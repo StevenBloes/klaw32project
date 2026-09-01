@@ -12,6 +12,10 @@ const endpoints = {
   updateDeliveryNo: { url: (id) => `/edit/delivery_no/${id}`, method: 'POST' },
   // simple calls
   getProductionDetail: { url: (id) => `/production_sheet?id=${id}`, method: 'GET' },
+  // safety calls
+  getChecksOverview: { url: `/safety/checks_overview`, method: 'GET' },
+  getFullCheck: { url: (id) => `/safety/check/${id}/full`, method: 'GET' },
+  createCheck: { url: `/safety/check`, method: 'POST' }
 };
 
 export async function callApi(name, { params, body } = {}) {

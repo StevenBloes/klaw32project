@@ -1,151 +1,18 @@
 export const title = "KLA W32 - Inspecties";
 
+import { callApi } from "../../services/apiCalls.js";
+
 const VIEWMODE = 0;
 const CREATEMODE = 1;
 const EDITMODE = 2;
 
-let MODE = 0;
+let MODE = VIEWMODE;
+let loadedInspectionId;
+let checkDetailData;
 
 const formatId = (prefix, value) => `${prefix}_${String(value).padStart(3, "0")}`;
+const formatDate = (value) => `${(new Date(value)).toLocaleDateString("nl-BE")}`;
 
-const SAMPLE_DATA = [
-  {
-    id: 1,
-    type: "Dagelijks",
-    date: "2026-08-23",
-    time: "09:38",
-    location: "Productiehal",
-    executedBy: "S. Bloes",
-    function: "Kwaliteitsmedewerker",
-    deviationCount: 1,
-    securityLevel: 1,
-    status: "Voltooid",
-    remarks: "Dagelijkse rondgang, controle productie.",
-    checkItems: [
-      {
-        id: 1,
-        checkpointId: 1,
-        securityLevel: 1,
-        description: "Perimeter hek intact",
-        result: 1,
-        remarks: "-"
-      }, {
-        id: 1,
-        checkpointId: 2,
-        securityLevel: 1,
-        description: "Logboek bezoekers compleet",
-        result: 0,
-        remarks: "Chauffeur niet aangemeld"
-      }, {
-        id: 1,
-        checkpointId: 3,
-        securityLevel: 1,
-        description: "Signalisatie goed zichtbaar",
-        result: 1,
-        remarks: "-"
-      }
-    ],
-    deviations: [
-      {
-        deviationId: 1,
-        description: "Chauffeur niet aangemeld",
-        severity: "MEDIUM",
-        status: "ACTION_ASSIGNED"
-      }
-    ]
-  }, {
-    id: 2,
-    type: "Wekelijks",
-    date: "2026-08-24",
-    time: "11:23",
-    location: "Volle Perimeter",
-    executedBy: "S. Bloes",
-    function: "Kwaliteitsmedewerker",
-    deviationCount: 2,
-    securityLevel: 1,
-    status: "Voltooid",
-    remarks: "Wekelijkse rondgang, uitgebreide controle van de toegangscontrole.",
-    checkItems: [
-      {
-        id: 1,
-        checkpointId: 1,
-        securityLevel: 1,
-        description: "Perimeter hek intact",
-        result: 1,
-        remarks: "-"
-      }, {
-        id: 1,
-        checkpointId: 2,
-        securityLevel: 1,
-        description: "Logboek bezoekers compleet",
-        result: 0,
-        remarks: "Chauffeur niet aangemeld"
-      }, {
-        id: 1,
-        checkpointId: 3,
-        securityLevel: 1,
-        description: "Signalisatie goed zichtbaar",
-        result: 0,
-        remarks: "Pallet voor signalisatie geplaatst"
-      }
-    ],
-    deviations: [
-      {
-        deviationId: 2,
-        description: "Onbekend persoon waargenomen in productiehal",
-        severity: "HIGH",
-        status: "OPEN"
-      }, {
-        deviationId: 3,
-        description: "Chauffeur niet aangemeld",
-        severity: "MEDIUM",
-        status: "ACTION_ASSIGNED"
-      }, {
-        deviationId: 4,
-        description: "Pallet voor signalisatie geplaatst",
-        severity: "LOW",
-        status: "CLOSED"
-      }
-    ]
-  }, {
-    id: 3,
-    type: "Dagelijks",
-    date: "2026-08-26",
-    time: "10:24",
-    location: "Productiehal",
-    executedBy: "S. Bloes",
-    function: "Kwaliteitsmedewerker",
-    deviationCount: 0,
-    securityLevel: 1,
-    status: "Voltooid",
-    remarks: "Dagelijkse rondgang door productie.",
-    checkItems: [
-      {
-        id: 1,
-        checkpointId: 1,
-        securityLevel: 1,
-        description: "Perimeter hek intact",
-        result: 1,
-        remarks: "-"
-      }, {
-        id: 1,
-        checkpointId: 2,
-        securityLevel: 1,
-        description: "Logboek bezoekers compleet",
-        result: 1,
-        remarks: "-"
-      }, {
-        id: 1,
-        checkpointId: 3,
-        securityLevel: 1,
-        description: "Signalisatie goed zichtbaar",
-        result: 1,
-        remarks: "-"
-      }
-    ],
-    deviations: []
-  }
-];
 
 const maps = {
   securityLevel: {
@@ -153,153 +20,219 @@ const maps = {
     2: { text: "Niveau 2", css: "security-level-2" },
     3: { text: "Niveau 3", css: "security-level-3" },
   },
-  status: {
-    OPEN: { text: "Open", css: "status-open" },
-    ACTION_ASSIGNED: { text: "In behandeling", css: "status-progress" },
-    AWAITING_VERIFICATION: { text: "In behandeling", css: "status-verify" },
-    CLOSED: { text: "Afgesloten", css: "status-closed" }
+  checkStatus: {
+    PLANNED: { text: "Open", css: ["status-open"] },
+    IN_PROGRESS: { text: "In behandeling", css: ["status-progress"] },
+    DONE: { text: "Afgerond", css: ["status-closed"] },
+  },
+  deviationStatus: {
+    OPEN: { text: "Open", css: ["status-open"] },
+    ACTION_ASSIGNED: { text: "In behandeling", css: ["status-progress"] },
+    AWAITING_VERIFICATION: { text: "In behandeling", css: ["status-verify"] },
+    CLOSED: { text: "Afgesloten", css: ["status-closed"] }
   },
   severity: {
-    LOW: { text: "Laag", css: "severity-low" },
-    MEDIUM: { text: "Medium", css: "severity-medium" },
-    HIGH: { text: "Hoog", css: "severity-high" }
+    LOW: { text: "Laag", css: ["severity-low"] },
+    MEDIUM: { text: "Medium", css: ["severity-medium"] },
+    HIGH: { text: "Hoog", css: ["severity-high"] }
   },
   checkResult: {
-    0: { text: "NOK", css: "result-nok" },
-    1: { text: "OK", css: "result-ok" }
+    0: { text: "NOK", css: ["result-nok", "numeric-column"] },
+    1: { text: "OK", css: ["result-ok", "numeric-column"] }
+  },
+  deviationCount: {
+    0: { css: ["result-ok", "numeric-column"] },
+    default: { css: ["result-nok", "numeric-column"] }
   }
 }
 
-const table_columns = ["id", "securityLevel", "date", "type", "location", "executedBy", "deviationCount", "status"];
+const checks_tbl_cols = [
+  { field: "check_id", formatter: value => formatId("INS", value) },
+  { field: "security_level", cellcss: "numeric-column" },
+  { field: "inspection_date", formatter: value => formatDate(value) },
+  { field: "type" },
+  { field: "area" },
+  { field: "performed_by" },
+  { field: "deviation_count", map: "deviationCount" },
+  { field: "check_status_value", map: "checkStatus", pillow: true }
+];
+
 const checkpoint_tbl_cols = [
-  { field: "checkpointId", cellcss: "numeric-column" },
-  { field: "securityLevel", cellcss: "numeric-column" },
-  { field: "description" },
-  { field: "result", cellcss: "numeric-column", map: "checkResult" },
+  { field: "checkpoint_id", cellcss: "numeric-column" },
+  { field: "security_level", cellcss: "numeric-column" },
+  { field: "checkpoint_description" },
+  { field: "result", map: "checkResult" },
   { field: "remarks" }
 ];
+
 const deviation_tbl_cols = [
-  { field: "deviationId", title: "ID", formatter: value => formatId("AFW", value) },
+  { field: "deviation_id", title: "ID", formatter: value => formatId("AFW", value) },
   { field: "description", title: "Omschrijving" },
-  { field: "severity", title: "Risico", map: "severity" },
-  { field: "status", title: "Status", map: "status" }
+  { field: "severity", title: "Risico", map: "severity", pillow: true },
+  { field: "status", title: "Status", map: "deviationStatus", pillow: true }
 ];
 
+function createTableCell(rowData, column) {
+  const cell = document.createElement("td");
 
-function loadData(root) {
+  if (column.cellcss) {
+    cell.classList.add(...column.cellcss);
+  }
 
-  /* still needs fetch request to API for actual data */
+  let value = rowData[column.field];
+  if (column.formatter) {
+    value = column.formatter(value);
+  }
 
-  const table = root.querySelector("#inspection_tbl");
+  if (column.map) {
+    const mapItem = maps[column.map][value] ?? maps[column.map]["default"];
 
-  SAMPLE_DATA.forEach(item => {
+    if (column.pillow) {
+      const span = document.createElement("span");
 
-    const row = document.createElement("tr");
-    row.id = "INS_" + item.id;
-    row.onclick = () => {
-      loadDetail(root, item.id);
-    };
+      if (mapItem.css) {
+        span.classList.add(...mapItem.css);
+      }
 
-    table_columns.forEach(column => {
-      const cell = document.createElement("td");
-
-      if (column === "id") {
-        cell.innerHTML = `INS_${String(item[column]).padStart(3, "0")}`;
+      if (mapItem.text) {
+        span.textContent = mapItem.text;
       } else {
-        cell.innerHTML = Array.isArray(column) ? column.map(col => item[col]).join(" ") : item[column];
+        span.textContent = value;
       }
 
-      if (column === "deviationCount") {
-        if (item[column] > 0) {
-          cell.classList.add("bold-red-txt", "numeric-column");
-        } else {
-          cell.classList.add("bold-green-txt", "numeric-column");
-        }
-      } else if (column === "checkpointId" || column === "securityLevel") {
-        cell.classList.add("numeric-column");
+      cell.appendChild(span);
+    } else {
+      if (mapItem.css) {
+        cell.classList.add(...mapItem.css);
       }
 
-      row.appendChild(cell);
-    });
+      if (mapItem.text) {
+        cell.textContent = mapItem.text;
+      } else {
+        cell.textContent = value;
+      }
+    }
+  } else {
+    cell.textContent = value;
+  }
 
-    table.appendChild(row);
-  });
+  return cell;
 }
 
-function loadDetail(root, id) {
+async function loadData(root) {
+  // create inspection table
+  const table = root.querySelector("#inspection_tbl");
+  table.innerHTML = "";
+
+  try {
+    // fetch the records data
+    const checksList = await callApi("getChecksOverview");
+
+    // insert records rows in inspection table
+    checksList.forEach(item => {
+      const row = document.createElement("tr");
+      row.id = "INS_" + item.check_id;
+      row.onclick = async () => {
+        await loadDetail(root, item.check_id);
+      };
+
+      checks_tbl_cols.forEach(column => {
+        row.appendChild(createTableCell(item, column));
+      });
+
+      table.appendChild(row);
+    });
+  } catch (e) {
+    console.log(e);
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
+    cell.colSpan = checks_tbl_cols.length;
+    cell.textContent = e;
+    row.appendChild(cell);
+    table.appendChild(row);
+  }
+
+}
+
+async function loadDetail(root, id) {
+  // only load detail data if the user is viewing data
   if (MODE !== VIEWMODE) {
     return;
   }
 
-  root.querySelector("#detail-title").innerHTML = `${formatId("INS", id)} - Inspectie Rapport`;
+  try {
+    // fetch inspection data
+    checkDetailData = await callApi("getFullCheck", { params: id });
 
-  root.querySelector("#detail-id").value = `${formatId("INS", id)}`;
-  root.querySelector("#detail-type").value = SAMPLE_DATA.filter((key) => key.id === id)[0].type;
-  root.querySelector("#detail-date").value = SAMPLE_DATA.filter((key) => key.id === id)[0].date;
-  root.querySelector("#detail-time").value = SAMPLE_DATA.filter((key) => key.id === id)[0].time;
-  root.querySelector("#detail-location").value = SAMPLE_DATA.filter((key) => key.id === id)[0].location;
-  root.querySelector("#detail-executed-by").value = SAMPLE_DATA.filter((key) => key.id === id)[0].executedBy;
-  root.querySelector("#detail-function").value = SAMPLE_DATA.filter((key) => key.id === id)[0].function;
-  root.querySelector("#detail-security-level").value = SAMPLE_DATA.filter((key) => key.id === id)[0].securityLevel;
-  root.querySelector("#detail-remarks").value = SAMPLE_DATA.filter((key) => key.id === id)[0].remarks;
+    // insert the fields
+    root.querySelector("#detail-title").textContent = `${formatId("INS", id)} - Inspectie Rapport`;
+    root.querySelector("#detail-id").value = `${formatId("INS", id)}`;
+    root.querySelector("#detail-type").value = checkDetailData.check.type;
+    root.querySelector("#detail-date").value = formatDate(checkDetailData.check.inspection_date);
+    root.querySelector("#detail-time").value = checkDetailData.check.inspection_time;
+    root.querySelector("#detail-location").value = checkDetailData.check.area;
+    root.querySelector("#detail-executed-by").value = checkDetailData.check.performed_by;
+    root.querySelector("#detail-function").value = "-";
+    root.querySelector("#detail-security-level").value = checkDetailData.check.security_level;
+    root.querySelector("#detail-remarks").value = checkDetailData.check.remarks;
 
-  const checkpointTable = root.querySelector("#checkpoint-tbl");
-  checkpointTable.innerHTML = "";
+    // update the table for checkpoints
+    const checkpointTable = root.querySelector("#checkpoint-tbl");
+    checkpointTable.innerHTML = "";
 
-  SAMPLE_DATA.filter((key) => key.id === id)[0].checkItems.forEach(item => {
-    const row = document.createElement("tr");
-    checkpoint_tbl_cols.forEach(column => {
-      
-      const cell = document.createElement("td");
-      
-      if(column.cellcss){
-        cell.classList.add(column.cellcss);
-      }
+    checkDetailData.items.forEach(item => {
+      const row = document.createElement("tr");
 
-      if(column.map){
-        const mapItem = maps[column.map][item[column.field]];
-        cell.textContent = mapItem.text;
-        cell.classList.add(mapItem.css);
-      } else {
-        cell.textContent = item[column.field];
-      }      
+      checkpoint_tbl_cols.forEach(column => {
+        row.appendChild(createTableCell(item, column));
+      })
 
-      row.appendChild(cell);
-    })
-
-    checkpointTable.appendChild(row);
-  });
-
-
-
-  // insert deviations
-  root.querySelector("#deviationCounter").textContent = SAMPLE_DATA.filter((key) => key.id === id)[0].deviations.length;
-
-  const deviationTable = root.querySelector("#deviation-tbl");
-  deviationTable.innerHTML = "";
-
-  SAMPLE_DATA.filter((key) => key.id === id)[0].deviations.forEach(deviation => {
-    const row = document.createElement("tr");
-    deviation_tbl_cols.forEach(column => {
-      const cell = document.createElement("td");
-      if (column.map) {
-        const mapItem = maps[column.map][deviation[column.field]];
-        const span = document.createElement("span");
-        span.textContent = mapItem.text;
-        span.classList.add(mapItem.css);
-        cell.appendChild(span);
-      } else {
-        let value = deviation[column.field];
-        if (column.formatter) {
-          value = column.formatter(value);
-        }
-        cell.textContent = value;
-      }
-      row.appendChild(cell);
+      checkpointTable.appendChild(row);
     });
 
-    deviationTable.appendChild(row);
-  });
+    // update the deviations counter
+    root.querySelector("#deviationCounter").textContent = checkDetailData.deviations.length;
+
+    // update the table for deviations
+    const deviationTable = root.querySelector("#deviation-tbl");
+    deviationTable.innerHTML = "";
+
+    checkDetailData.deviations.forEach(deviation => {
+      const row = document.createElement("tr");
+
+      deviation_tbl_cols.forEach(column => {
+        row.appendChild(createTableCell(deviation, column));
+      });
+
+      deviationTable.appendChild(row);
+    });
+
+    loadedInspectionId = id;
+
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function saveData(root) {
+  if (MODE === CREATEMODE) {
+    const result = await callApi("createCheck", {
+      body: {
+        inspection_date: root.querySelector("#detail-date").value,
+        inspection_time: root.querySelector("#detail-time").value,
+        type: root.querySelector("#detail-type").value,
+        area: root.querySelector("#detail-location").value,
+        performed_by: root.querySelector("#detail-executed-by").value,
+        security_level: root.querySelector("#detail-security-level").value,
+        remarks: root.querySelector("#detail-remarks").value
+      }
+    });
+    console.log(result);
+
+    loadData(root);
+  }
+
+  changeMode(VIEWMODE);
 }
 
 function changeMode(mode) {
@@ -307,12 +240,12 @@ function changeMode(mode) {
 
   const inputForm = document.querySelector("#input-form");
 
-  inputForm.querySelector("#mode-btn").innerHTML = MODE === VIEWMODE ? "Wijzigen" : "Opslaan";
-
-  inputForm.classList.toggle("edit-mode", MODE === EDITMODE);
-  inputForm.classList.toggle("view-mode", MODE !== EDITMODE);
+  inputForm.classList.toggle("edit-mode", (MODE === EDITMODE || MODE === CREATEMODE));
+  inputForm.classList.toggle("view-mode", MODE === VIEWMODE);
 
   inputForm.querySelectorAll("input, textarea").forEach(el => el.readOnly = (MODE === VIEWMODE));
+  inputForm.querySelector("#save-btn").disabled = (MODE === VIEWMODE);
+  document.querySelector("#new-inspection-btn").disabled = (MODE === CREATEMODE || MODE === EDITMODE);
 }
 
 export function render(id) {
@@ -321,7 +254,7 @@ export function render(id) {
     <div class="insp-col1">
     <div style="display: flex; justify-content: space-between;">
       <h3 class="work-panel-title">Uitgevoerde Inspecties</h3>
-      <button class="new-btn">+ Nieuwe Inspectie</button>
+      <button id="new-inspection-btn" class="new-btn">+ Nieuwe Inspectie</button>
     </div>
     <div>filters</div>
     <div class="table-container">
@@ -383,7 +316,7 @@ export function render(id) {
           </div>
         </div>
       </div>
-      <div>
+      <div style="width: 100%">
         <label style="vertical-align: top;">Opmerkingen</label>
         <textarea id="detail-remarks"></textarea>
       </div>
@@ -418,8 +351,7 @@ export function render(id) {
       </div>
       <div style="margin: 2em 0em; display: flex; justify-content: space-between;">
         <div>
-          <button id="mode-btn" class="action-btn">Wijzigen</button>
-          <button id="print-btn" class="action-btn">Print</button>
+          <button id="save-btn" class="action-btn">Opslaan</button>
         </div>
         <button class="new-btn">+ Nieuwe Afwijking</button>
       </div>
@@ -429,19 +361,27 @@ export function render(id) {
   `;
 }
 
-export function init(root, id) {
-  loadData(root);
+export async function init(root, id) {
+  await loadData(root);
+
+  if (id) {
+    await loadDetail(root, id);
+  }
 
   const inputForm = root.querySelector("#input-form");
   inputForm.querySelectorAll("input, textarea").forEach(el => el.readOnly = (MODE === VIEWMODE));
 
-  root.querySelector("#mode-btn").onclick = () => {
-    if (MODE === EDITMODE) {
-      changeMode(VIEWMODE);
-    } else if (MODE === VIEWMODE) {
-      changeMode(EDITMODE);
+  root.querySelector("#new-inspection-btn").onclick = () => {
+    if (MODE === VIEWMODE) {
+      changeMode(CREATEMODE);
     }
   };
+
+  root.querySelector("#save-btn").onclick = async () => {
+    await saveData(root);
+  };
+
+  changeMode(VIEWMODE);
 }
 
 export function destroy() {
