@@ -69,8 +69,10 @@ const checkpoint_tbl_cols = [
   { field: "checkpoint_description" },
   {
     field: "result", map: "checkResult", default: "1", onclick: (row) => {
-      row.result = row.result ? 0 : 1;
-      renderCheckPointTable();
+      if (MODE === CREATEMODE || MODE === EDITMODE) {
+        row.result = row.result ? 0 : 1;
+        renderCheckPointTable();
+      }
     }
   },
   { field: "remarks", default: "-", editable: true }
