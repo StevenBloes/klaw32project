@@ -370,7 +370,6 @@ textarea {
 	border-radius: 6px;
 	padding: 8px 12px;
 	background: #fefefe;
-
 }
 
 .edit-mode textarea {
@@ -384,6 +383,19 @@ textarea {
 	outline: none;
 }
 
+td[contenteditable="true"]:hover {
+	cursor: pointer;
+	background-color: #A0A1;
+	border-radius: 6px;
+}
+
+td[contenteditable="true"]:focus {
+	outline: none;
+	box-shadow: inset 0 0 0 2px #A0B4;
+	background-color: #fff0;
+	border-radius: 2px;
+}
+
 .new-btn {
 	background-color: #4EA13F;
 	border: solid #5A5 1px;
@@ -391,8 +403,7 @@ textarea {
 	box-shadow: 1px 1px 2px #0002;
 	color: white;
 	font-size: 1.0em;
-	padding: 0.3em;
-	padding-right: 0.6em;
+	padding: 0.3em 0.6em;
 }
 
 .new-btn:hover {
@@ -402,6 +413,16 @@ textarea {
 .new-btn:active {
 	background-color: #181;
 	border-color: #171;
+}
+
+.cancel-btn {
+	background-color: #F00B;
+	border: solid #F005 1px;
+	border-radius: 4px;
+	box-shadow: 1px 1px 2px #0002;
+	color: white;
+	font-size: 1.0em;
+	padding: 0.3em 0.6em;
 }
 
 .action-btn {
@@ -424,17 +445,19 @@ textarea {
 	border-color: #23A;
 }
 
-.new-btn:disabled,
-.action-btn:disabled {
+.action-btn:disabled,
+.cancel-btn:disabled,
+.new-btn:disabled {
 	background-color: #0001;
 	border-color: #0001;
 	outline: none;
-	border-radius: 4px;
 	box-shadow: 1px 1px 2px #00000001;
 	color: #0003;
-	font-size: 1.0em;
-	padding: 0.3em 0.6em;
 	cursor: not-allowed;
+}
+
+.logo-text-btn {
+	padding: 0.3em 0.6em 0.3em 0.25em;
 }
 
 /***************************************************************************
@@ -455,6 +478,19 @@ textarea {
 	font-size: 0.9em;
 	font-weight: 600;
 	color: red;
+}
+
+.edit-mode .result-ok,
+.edit-mode .result-nok {
+	cursor: pointer;
+	user-select: none;	
+}
+
+.edit-mode .result-ok:hover,
+.edit-mode .result-nok:hover {
+	cursor: pointer;
+	background-color: #A0A1;
+	border-radius: 6px;
 }
 
 .status-open {

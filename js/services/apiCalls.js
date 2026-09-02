@@ -15,7 +15,12 @@ const endpoints = {
   // safety calls
   getChecksOverview: { url: `/safety/checks_overview`, method: 'GET' },
   getFullCheck: { url: (id) => `/safety/check/${id}/full`, method: 'GET' },
-  createCheck: { url: `/safety/check`, method: 'POST' }
+  createCheck: { url: `/safety/check`, method: 'POST' },
+  updateCheck: { url: (id) => `/safety/check/${id}`, method: 'POST' },
+  getCheckpoints: { url:`/safety/checkpoints`, method: 'GET' },
+  bulkCreateCheckItems: { url: `/safety/check-items/create`, method: 'POST' },
+  bulkUpdateCheckItems: { url: `/safety/check-items/update`, method: 'POST' }
+  
 };
 
 export async function callApi(name, { params, body } = {}) {

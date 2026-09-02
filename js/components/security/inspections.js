@@ -8,10 +8,16 @@ const EDITMODE = 2;
 
 let MODE = VIEWMODE;
 let loadedInspectionId;
-let checkDetailData;
+let checkDetailData = [];
+let checkpointData = [];
+let deviationData = [];
 
 const formatId = (prefix, value) => `${prefix}_${String(value).padStart(3, "0")}`;
 const formatDate = (value) => `${(new Date(value)).toLocaleDateString("nl-BE")}`;
+const formatDateInput = (value) => new Date(value);
+const formatTime = (value) => `${`${String(value).split(":")[0]}:${String(value).split(":")[1]}`}`;
+
+//let checkpoints;
 
 
 const maps = {
@@ -38,7 +44,7 @@ const maps = {
   },
   checkResult: {
     0: { text: "NOK", css: ["result-nok", "numeric-column"] },
-    1: { text: "OK", css: ["result-ok", "numeric-column"] }
+    1: { text: "OK", css: ["result-ok", "numeric-column"] },
   },
   deviationCount: {
     0: { css: ["result-ok", "numeric-column"] },
@@ -59,10 +65,15 @@ const checks_tbl_cols = [
 
 const checkpoint_tbl_cols = [
   { field: "checkpoint_id", cellcss: "numeric-column" },
-  { field: "security_level", cellcss: "numeric-column" },
+  { field: "security_level", cellcss: "numeric-column", default: "1" },
   { field: "checkpoint_description" },
-  { field: "result", map: "checkResult" },
-  { field: "remarks" }
+  {
+    field: "result", map: "checkResult", default: "1", onclick: (row) => {
+      row.result = row.result ? 0 : 1;
+      renderCheckPointTable();
+    }
+  },
+  { field: "remarks", default: "-", editable: true }
 ];
 
 const deviation_tbl_cols = [
@@ -73,44 +84,61 @@ const deviation_tbl_cols = [
 ];
 
 function createTableCell(rowData, column) {
+
   const cell = document.createElement("td");
+
+  if (column.editable && MODE !== VIEWMODE) {
+    cell.contentEditable = true;
+  }
+
 
   if (column.cellcss) {
     cell.classList.add(...column.cellcss);
   }
 
-  let value = rowData[column.field];
+  if (column.onclick) {
+    cell.onclick = () => column.onclick(rowData);
+  }
+
+  let value = rowData[column.field] ?? column.default;
+
   if (column.formatter) {
     value = column.formatter(value);
   }
 
   if (column.map) {
-    const mapItem = maps[column.map][value] ?? maps[column.map]["default"];
+    try {
+      const mapItem = maps[column.map][value] ?? maps[column.map]["default"];
 
-    if (column.pillow) {
-      const span = document.createElement("span");
+      if (column.pillow) {
+        const span = document.createElement("span");
 
-      if (mapItem.css) {
-        span.classList.add(...mapItem.css);
-      }
+        if (mapItem.css) {
+          span.classList.add(...mapItem.css);
+        }
 
-      if (mapItem.text) {
-        span.textContent = mapItem.text;
+        if (mapItem.text) {
+          span.textContent = mapItem.text;
+        } else {
+          span.textContent = value;
+        }
+
+        cell.appendChild(span);
       } else {
-        span.textContent = value;
-      }
+        if (mapItem.css) {
+          cell.classList.add(...mapItem.css);
+        }
 
-      cell.appendChild(span);
-    } else {
-      if (mapItem.css) {
-        cell.classList.add(...mapItem.css);
+        if (mapItem.text) {
+          cell.textContent = mapItem.text;
+        } else {
+          cell.textContent = value;
+        }
       }
-
-      if (mapItem.text) {
-        cell.textContent = mapItem.text;
-      } else {
-        cell.textContent = value;
-      }
+    } catch (e) {
+      console.log(e.message);
+      console.log(column);
+      console.log(value);
     }
   } else {
     cell.textContent = value;
@@ -151,7 +179,6 @@ async function loadData(root) {
     row.appendChild(cell);
     table.appendChild(row);
   }
-
 }
 
 async function loadDetail(root, id) {
@@ -163,13 +190,15 @@ async function loadDetail(root, id) {
   try {
     // fetch inspection data
     checkDetailData = await callApi("getFullCheck", { params: id });
+    checkpointData = checkDetailData.items;
+    deviationData = checkDetailData.deviations;
 
     // insert the fields
     root.querySelector("#detail-title").textContent = `${formatId("INS", id)} - Inspectie Rapport`;
     root.querySelector("#detail-id").value = `${formatId("INS", id)}`;
     root.querySelector("#detail-type").value = checkDetailData.check.type;
-    root.querySelector("#detail-date").value = formatDate(checkDetailData.check.inspection_date);
-    root.querySelector("#detail-time").value = checkDetailData.check.inspection_time;
+    root.querySelector("#detail-date").valueAsDate = formatDateInput(checkDetailData.check.inspection_date);
+    root.querySelector("#detail-time").value = `${formatTime(checkDetailData.check.inspection_time)}`;
     root.querySelector("#detail-location").value = checkDetailData.check.area;
     root.querySelector("#detail-executed-by").value = checkDetailData.check.performed_by;
     root.querySelector("#detail-function").value = "-";
@@ -177,61 +206,132 @@ async function loadDetail(root, id) {
     root.querySelector("#detail-remarks").value = checkDetailData.check.remarks;
 
     // update the table for checkpoints
-    const checkpointTable = root.querySelector("#checkpoint-tbl");
-    checkpointTable.innerHTML = "";
-
-    checkDetailData.items.forEach(item => {
-      const row = document.createElement("tr");
-
-      checkpoint_tbl_cols.forEach(column => {
-        row.appendChild(createTableCell(item, column));
-      })
-
-      checkpointTable.appendChild(row);
-    });
+    renderCheckPointTable();
 
     // update the deviations counter
     root.querySelector("#deviationCounter").textContent = checkDetailData.deviations.length;
 
     // update the table for deviations
-    const deviationTable = root.querySelector("#deviation-tbl");
-    deviationTable.innerHTML = "";
-
-    checkDetailData.deviations.forEach(deviation => {
-      const row = document.createElement("tr");
-
-      deviation_tbl_cols.forEach(column => {
-        row.appendChild(createTableCell(deviation, column));
-      });
-
-      deviationTable.appendChild(row);
-    });
+    renderDeviationTable();
 
     loadedInspectionId = id;
+    document.querySelector("#edit-btn").disabled = (MODE === CREATEMODE || MODE === EDITMODE || (MODE === VIEWMODE && loadedInspectionId === null));
 
   } catch (e) {
     console.log(e);
   }
 }
 
-async function saveData(root) {
-  if (MODE === CREATEMODE) {
-    const result = await callApi("createCheck", {
-      body: {
-        inspection_date: root.querySelector("#detail-date").value,
-        inspection_time: root.querySelector("#detail-time").value,
-        type: root.querySelector("#detail-type").value,
-        area: root.querySelector("#detail-location").value,
-        performed_by: root.querySelector("#detail-executed-by").value,
-        security_level: root.querySelector("#detail-security-level").value,
-        remarks: root.querySelector("#detail-remarks").value
+function renderCheckPointTable() {
+  const checkpointTable = document.querySelector("#checkpoint-tbl");
+  checkpointTable.innerHTML = "";
+
+  checkpointData.forEach(item => {
+    const row = document.createElement("tr");
+
+    checkpoint_tbl_cols.forEach(column => {
+      row.appendChild(createTableCell(item, column));
+    })
+
+    checkpointTable.appendChild(row);
+  });
+}
+
+function renderDeviationTable() {
+  const deviationTable = document.querySelector("#deviation-tbl");
+  deviationTable.innerHTML = "";
+
+  deviationData.forEach(deviation => {
+    const row = document.createElement("tr");
+
+    deviation_tbl_cols.forEach(column => {
+      row.appendChild(createTableCell(deviation, column));
+    });
+
+    deviationTable.appendChild(row);
+  });
+}
+
+async function clearForm(root) {
+  loadedInspectionId = null;
+
+  root.querySelector("#detail-title").textContent = `Inspectie Rapport`;
+  root.querySelector("#detail-id").value = "";
+  root.querySelector("#detail-type").value = "";
+  root.querySelector("#detail-date").valueAsDate = new Date();
+  root.querySelector("#detail-time").value = `${(new Date()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+  root.querySelector("#detail-location").value = "";
+  root.querySelector("#detail-executed-by").value = "";
+  root.querySelector("#detail-function").value = "";
+  root.querySelector("#detail-security-level").value = "";
+  root.querySelector("#detail-remarks").value = "";
+
+  checkpointData = await callApi("getCheckpoints");
+
+  checkpointData.forEach(checkpoint => {
+    checkpoint_tbl_cols.forEach(column => {
+      const cell = createTableCell(checkpoint, column);
+
+      if (!checkpoint[column.field]) {
+        // check if cell content exist in map (sometimes it's rendered as something different)
+        if (column.map) {
+          if (column.map[cell.textContent]) {
+            checkpoint[column.field] = cell.textContent;
+          } else {
+            checkpoint[column.field] = column.default;
+          }
+        } else {
+          checkpoint[column.field] = cell.textContent;
+        }
       }
     });
-    console.log(result);
+  });
 
-    loadData(root);
+  // clear the table for deviations
+  const deviationTable = root.querySelector("#deviation-tbl");
+  deviationTable.innerHTML = "";
+}
+
+async function saveData(root) {
+  const bodyContent = {
+    inspection_date: root.querySelector("#detail-date").value,
+    inspection_time: root.querySelector("#detail-time").value,
+    type: root.querySelector("#detail-type").value,
+    area: root.querySelector("#detail-location").value,
+    performed_by: root.querySelector("#detail-executed-by").value,
+    security_level: root.querySelector("#detail-security-level").value,
+    remarks: root.querySelector("#detail-remarks").value
+  };
+
+  if (MODE === CREATEMODE) {
+    const result = await callApi("createCheck", {
+      body: bodyContent
+    });
+    console.log(result);
+    if (result.success) {
+      checkpointData.forEach(element => {
+        element["check_id"] = result.check_id;
+      });
+      const result2 = await callApi("bulkCreateCheckItems", {
+        body: { items: checkpointData }
+      });
+      console.log(result2);
+    }
+  } else if (MODE === EDITMODE) {
+    const result = await callApi("updateCheck", {
+      params: loadedInspectionId,
+      body: bodyContent
+    });
+    console.log(result);
+    if (result.success) {
+      const result2 = await callApi("bulkUpdateCheckItems", {
+        body: { items: checkpointData }
+      });
+      console.log(result2);
+    }
   }
 
+  loadData(root);
   changeMode(VIEWMODE);
 }
 
@@ -244,8 +344,12 @@ function changeMode(mode) {
   inputForm.classList.toggle("view-mode", MODE === VIEWMODE);
 
   inputForm.querySelectorAll("input, textarea").forEach(el => el.readOnly = (MODE === VIEWMODE));
+  document.querySelector("#cancel-btn").disabled = (MODE === VIEWMODE);
   inputForm.querySelector("#save-btn").disabled = (MODE === VIEWMODE);
+  inputForm.querySelector("#edit-btn").disabled = (MODE === CREATEMODE || MODE === EDITMODE || (MODE === VIEWMODE && loadedInspectionId === null));
   document.querySelector("#new-inspection-btn").disabled = (MODE === CREATEMODE || MODE === EDITMODE);
+
+  renderCheckPointTable();
 }
 
 export function render(id) {
@@ -254,7 +358,7 @@ export function render(id) {
     <div class="insp-col1">
     <div style="display: flex; justify-content: space-between;">
       <h3 class="work-panel-title">Uitgevoerde Inspecties</h3>
-      <button id="new-inspection-btn" class="new-btn">+ Nieuwe Inspectie</button>
+      <button id="new-inspection-btn" class="new-btn logo-text-btn">+ Nieuwe Inspectie</button>
     </div>
     <div>filters</div>
     <div class="table-container">
@@ -277,7 +381,10 @@ export function render(id) {
     </div>
     </div>
     <div id="input-form" class="view-mode">
-      <h3 id="detail-title" class="work-panel-title">Inspectie Rapport</h3>
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <h3 id="detail-title" class="work-panel-title">Inspectie Rapport</h3>
+        <button id="edit-btn" class="action-btn logo-text-btn">&#9998; Bewerken</button>
+      </div>
       <div class="input-fields">
         <div class="field-column">
           <div class="field">
@@ -290,11 +397,11 @@ export function render(id) {
           </div>
           <div class="field">
             <label>Datum</label>
-            <input id="detail-date"/>
+            <input type="date" id="detail-date" required/>
           </div>
           <div class="field">
             <label>Tijdstip</label>
-            <input id="detail-time"/>
+            <input type="time" id="detail-time"/>
           </div>
         </div>
         <div class="field-column">
@@ -351,9 +458,10 @@ export function render(id) {
       </div>
       <div style="margin: 2em 0em; display: flex; justify-content: space-between;">
         <div>
-          <button id="save-btn" class="action-btn">Opslaan</button>
+          <button id="save-btn" class="action-btn logo-text-btn">&#128190; Opslaan</button>
+          <button id="cancel-btn" class="cancel-btn">Annuleren</button>
         </div>
-        <button class="new-btn">+ Nieuwe Afwijking</button>
+        <button class="new-btn logo-text-btn">+ Nieuwe Afwijking</button>
       </div>
     </div>
     </div>
@@ -371,14 +479,23 @@ export async function init(root, id) {
   const inputForm = root.querySelector("#input-form");
   inputForm.querySelectorAll("input, textarea").forEach(el => el.readOnly = (MODE === VIEWMODE));
 
-  root.querySelector("#new-inspection-btn").onclick = () => {
+  root.querySelector("#new-inspection-btn").onclick = async () => {
     if (MODE === VIEWMODE) {
+      await clearForm(root);
       changeMode(CREATEMODE);
     }
   };
 
   root.querySelector("#save-btn").onclick = async () => {
     await saveData(root);
+  };
+
+  root.querySelector("#cancel-btn").onclick = async () => {
+    changeMode(VIEWMODE);
+  };
+
+  root.querySelector("#edit-btn").onclick = async () => {
+    changeMode(EDITMODE);
   };
 
   changeMode(VIEWMODE);
