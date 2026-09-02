@@ -404,6 +404,7 @@ td[contenteditable="true"]:focus {
 	color: white;
 	font-size: 1.0em;
 	padding: 0.3em 0.6em;
+	line-height: 1;
 }
 
 .new-btn:hover {
@@ -423,6 +424,7 @@ td[contenteditable="true"]:focus {
 	color: white;
 	font-size: 1.0em;
 	padding: 0.3em 0.6em;
+	line-height: 1;
 }
 
 .action-btn {
@@ -434,6 +436,7 @@ td[contenteditable="true"]:focus {
 	font-size: 1.0em;
 	padding: 0.3em 0.6em;
 	cursor: pointer;
+	line-height: 1;
 }
 
 .action-btn:hover {
@@ -458,6 +461,7 @@ td[contenteditable="true"]:focus {
 
 .logo-text-btn {
 	padding: 0.3em 0.6em 0.3em 0.25em;
+	line-height: 1;
 }
 
 /***************************************************************************

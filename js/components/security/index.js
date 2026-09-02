@@ -1,5 +1,7 @@
 export const title = "KLA W32 - Havenveiligheid";
 
+import { callApi } from "../../services/apiCalls.js";
+
 const subTitles = {
 	"#/security": "Dashboard",
 	"#/security/": "Dashboard",
@@ -52,7 +54,7 @@ export function render(id) {
 			          <div>
 				          <span class="dash-row-item-name">Uitgevoerde<br>Inspecties</span>
 				          <br>
-				          <span class="dash-row-item-counter">0</span>
+				          <span id="inspectionCount" class="dash-row-item-counter">0</span>
 				        </div>
 			        </div>
 			        <a href="#/security/inspections" class="nav-link">open lijst</a>
@@ -132,7 +134,7 @@ export function render(id) {
   `;
 }
 
-export function init(root, id) {
+export async function init(root, id) {
 	root.querySelectorAll(".nav-item").forEach(item => {
 		item.onclick = () => {
 			window.location.hash = item.dataset.route;
@@ -143,6 +145,11 @@ export function init(root, id) {
 		highlightActiveNav(root);
 	});
 
+	const checksList = await callApi("getChecksOverview");
+	if(root.querySelector("#inspectionCount")){
+		root.querySelector("#inspectionCount").textContent = checksList.length;
+	}
+	
 	/* needs to run here when reloading page with child */
 	highlightActiveNav(root);
 }

@@ -17,8 +17,6 @@ const formatDate = (value) => `${(new Date(value)).toLocaleDateString("nl-BE")}`
 const formatDateInput = (value) => new Date(value);
 const formatTime = (value) => `${`${String(value).split(":")[0]}:${String(value).split(":")[1]}`}`;
 
-//let checkpoints;
-
 
 const maps = {
   securityLevel: {
@@ -304,6 +302,8 @@ async function clearForm(root) {
     });
   });
 
+  renderCheckPointTable();
+
   // clear the table for deviations
   const deviationTable = root.querySelector("#deviation-tbl");
   deviationTable.innerHTML = "";
@@ -363,7 +363,8 @@ function changeMode(mode) {
   inputForm.querySelectorAll("input, textarea").forEach(el => el.readOnly = (MODE === VIEWMODE));
   document.querySelector("#cancel-btn").disabled = (MODE === VIEWMODE);
   inputForm.querySelector("#save-btn").disabled = (MODE === VIEWMODE);
-  inputForm.querySelector("#edit-btn").disabled = (MODE === CREATEMODE || MODE === EDITMODE || (MODE === VIEWMODE && loadedInspectionId === null));
+  inputForm.querySelector("#new-deviation-btn").disabled = (MODE === VIEWMODE);
+  inputForm.querySelector("#edit-btn").disabled = (MODE === CREATEMODE || MODE === EDITMODE || (MODE === VIEWMODE && !loadedInspectionId));
   document.querySelector("#new-inspection-btn").disabled = (MODE === CREATEMODE || MODE === EDITMODE);
 
   renderCheckPointTable();
@@ -478,7 +479,7 @@ export function render(id) {
           <button id="save-btn" class="action-btn logo-text-btn">&#128190; Opslaan</button>
           <button id="cancel-btn" class="cancel-btn">Annuleren</button>
         </div>
-        <button class="new-btn logo-text-btn">+ Nieuwe Afwijking</button>
+        <button id="new-deviation-btn" class="new-btn logo-text-btn">+ Nieuwe Afwijking</button>
       </div>
     </div>
     </div>
@@ -515,6 +516,7 @@ export async function init(root, id) {
     changeMode(EDITMODE);
   };
 
+  clearForm(root);
   changeMode(VIEWMODE);
 }
 
