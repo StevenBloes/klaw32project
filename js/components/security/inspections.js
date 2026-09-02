@@ -89,6 +89,21 @@ function createTableCell(rowData, column) {
 
   if (column.editable && MODE !== VIEWMODE) {
     cell.contentEditable = true;
+
+    cell.addEventListener("focusin", (e) => {
+      cell.dataset.originalValue = cell.textContent;
+    });
+
+    cell.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        cell.textContent = cell.dataset.originalValue ?? "";
+        cell.blur();
+      }
+    });
+
+    cell.addEventListener("blur", (e) => {
+      rowData[column.field] = cell.textContent;
+    });
   }
 
 
