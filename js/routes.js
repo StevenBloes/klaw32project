@@ -33,6 +33,7 @@ const routes = {
     component: "security/index",
     css: "security.css",
     children: {
+      "checkpoints": "security/checkpoints",
       "inspections": "security/inspections",
       "deviations": "security/deviations",
       "actions": "security/actions",

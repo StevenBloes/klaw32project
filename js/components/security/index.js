@@ -6,6 +6,7 @@ const subTitles = {
 	"#/security": "Dashboard",
 	"#/security/": "Dashboard",
 	"#/security/index": "Dashboard",
+	"#/security/checkpoints": "Checkpoints",
 	"#/security/inspections": "Inspecties",
 	"#/security/deviations": "Afwijkingen",
 	"#/security/actions": "Maatregelen",
@@ -38,6 +39,7 @@ export function render(id) {
 	  <div class="content">
 	    <div class="nav-bar">
 	      <div id="nav-dashboard-btn" class="nav-item" data-route="#/security/">Dashboard</div>
+		  <div id="nav-checkpoints-btn" class="nav-item" data-route="#/security/checkpoints">Checkpoints</div>
 	      <div id="nav-inspections-btn" class="nav-item" data-route="#/security/inspections">Inspecties</div>
 	      <div id="nav-deviations-btn" class="nav-item" data-route="#/security/deviations">Afwijkingen</div>
 	      <div id="nav-actions-btn" class="nav-item" data-route="#/security/actions">Maatregelen</div>
