@@ -510,6 +510,11 @@ export async function init(root, id) {
 
   root.querySelector("#cancel-btn").onclick = async () => {
     changeMode(VIEWMODE);
+    if(loadedInspectionId){
+      await loadDetail(root, loadedInspectionId);
+    } else {
+      await clearForm(root);
+    }
   };
 
   root.querySelector("#edit-btn").onclick = async () => {
