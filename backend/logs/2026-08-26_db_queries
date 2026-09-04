@@ -1,0 +1,320 @@
+{
+  "timestamp": "2026-08-26 07:06:56",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_time = ? WHERE idPlanning = ?",
+  "params": [
+    "7:00",
+    "40939"
+  ],
+  "durationMs": 237
+}
+{
+  "timestamp": "2026-08-26 07:06:56",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_time = ? WHERE idPlanning = ?",
+  "params": [
+    "7:00",
+    "40939"
+  ],
+  "durationMs": 1
+}
+{
+  "timestamp": "2026-08-26 07:06:58",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_confirmation = ? WHERE idPlanning = ? ;",
+  "params": [
+    1,
+    "40939"
+  ],
+  "durationMs": 13
+}
+{
+  "timestamp": "2026-08-26 07:07:17",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_confirmation = ? WHERE idPlanning = ? ;",
+  "params": [
+    1,
+    "40937"
+  ],
+  "durationMs": 24
+}
+{
+  "timestamp": "2026-08-26 07:41:38",
+  "type": "query",
+  "sql": "SELECT date_format(p.expected_date, '%Y-%m-%d') AS 'expected_date', p.transport, date_format(p.arrival_time, '%H:%i') AS 'arrival_time', date_format(p.departure_time, '%H:%i') AS 'departure_time', o.order_reference, o.customer, op.mixpro_code, op.production_code, op.amount AS 'ordered_volume', bi.en_done AS 'delivered_volume', bi.recipe_name, bi.sap_delivery, c.sap_code FROM planning AS p LEFT JOIN orders AS o ON p.idPlanning = o.transport_id LEFT JOIN ordered_products AS op ON op.order_id = o.order_id LEFT JOIN batch_info AS bi ON op.production_code = bi.production_id LEFT JOIN sap_recipes_codes AS c ON op.mixpro_code = c.mixpro_code WHERE p.departure_time IS NOT NULL AND p.expected_date < '2026-08-26' AND YEAR(p.expected_date) >= YEAR(now()) - 1 ORDER BY p.expected_date DESC, p.departure_time ASC;",
+  "params": [],
+  "durationMs": 755
+}
+{
+  "timestamp": "2026-08-26 08:00:05",
+  "type": "query",
+  "sql": "SELECT p.idPlanning, p.expected_time, p.transport, p.remarks, p.arrival_time, p.departure_time, p.link_spriet, p.expected_time_var, p.arrival_confirmation, o.order_id, o.order_reference, o.customer, o.remarks AS location, o.time_remarks, op.id_ordered_product, op.line, op.mixpro_code, op.amount, op.remarks AS op_remarks, op.production_code, d.density, c.sap_code FROM planning AS p INNER JOIN orders AS o ON o.transport_id = p.idPlanning INNER JOIN ordered_products AS op ON o.order_id = op.order_id LEFT JOIN (SELECT ROUND(AVG(density)) AS density, recipe_code FROM batch_info WHERE density > 0 GROUP BY recipe_code) AS d ON op.mixpro_code = d.recipe_code LEFT JOIN sap_recipes_codes AS c ON op.mixpro_code = c.mixpro_code WHERE isplanned = 1 AND p.expected_date = ? ORDER BY ISNULL(p.link_spriet) ASC, p.link_spriet, p.transport NOT LIKE 'Braecke KW', p.transport NOT LIKE 'Debouvere', p.transport NOT LIKE 'Transdika', p.transport NOT LIKE 'Slabbinck C+R', p.transport NOT LIKE 'Slabbinck', p.transport NOT LIKE 'Terryn', p.transport NOT LIKE 'Johan', p.transport, ISNULL(p.expected_time), p.expected_time, p.idPlanning, op.id_ordered_product",
+  "params": [
+    "2026-08-26"
+  ],
+  "durationMs": 2461
+}
+{
+  "timestamp": "2026-08-26 08:01:12",
+  "type": "query",
+  "sql": "SELECT p.idPlanning, p.expected_time, p.transport, p.remarks, p.arrival_time, p.departure_time, p.link_spriet, p.expected_time_var, p.arrival_confirmation, o.order_id, o.order_reference, o.customer, o.remarks AS location, o.time_remarks, op.id_ordered_product, op.line, op.mixpro_code, op.amount, op.remarks AS op_remarks, op.production_code, d.density, c.sap_code FROM planning AS p INNER JOIN orders AS o ON o.transport_id = p.idPlanning INNER JOIN ordered_products AS op ON o.order_id = op.order_id LEFT JOIN (SELECT ROUND(AVG(density)) AS density, recipe_code FROM batch_info WHERE density > 0 GROUP BY recipe_code) AS d ON op.mixpro_code = d.recipe_code LEFT JOIN sap_recipes_codes AS c ON op.mixpro_code = c.mixpro_code WHERE isplanned = 1 AND p.expected_date = ? ORDER BY ISNULL(p.link_spriet) ASC, p.link_spriet, p.transport NOT LIKE 'Braecke KW', p.transport NOT LIKE 'Debouvere', p.transport NOT LIKE 'Transdika', p.transport NOT LIKE 'Slabbinck C+R', p.transport NOT LIKE 'Slabbinck', p.transport NOT LIKE 'Terryn', p.transport NOT LIKE 'Johan', p.transport, ISNULL(p.expected_time), p.expected_time, p.idPlanning, op.id_ordered_product",
+  "params": [
+    "2026-08-26"
+  ],
+  "durationMs": 1197
+}
+{
+  "timestamp": "2026-08-26 08:01:27",
+  "type": "query",
+  "sql": "SELECT p.idPlanning, p.expected_time, p.transport, p.remarks, p.arrival_time, p.departure_time, p.link_spriet, p.expected_time_var, p.arrival_confirmation, o.order_id, o.order_reference, o.customer, o.remarks AS location, o.time_remarks, op.id_ordered_product, op.line, op.mixpro_code, op.amount, op.remarks AS op_remarks, op.production_code, d.density, c.sap_code FROM planning AS p INNER JOIN orders AS o ON o.transport_id = p.idPlanning INNER JOIN ordered_products AS op ON o.order_id = op.order_id LEFT JOIN (SELECT ROUND(AVG(density)) AS density, recipe_code FROM batch_info WHERE density > 0 GROUP BY recipe_code) AS d ON op.mixpro_code = d.recipe_code LEFT JOIN sap_recipes_codes AS c ON op.mixpro_code = c.mixpro_code WHERE isplanned = 1 AND p.expected_date = ? ORDER BY ISNULL(p.link_spriet) ASC, p.link_spriet, p.transport NOT LIKE 'Braecke KW', p.transport NOT LIKE 'Debouvere', p.transport NOT LIKE 'Transdika', p.transport NOT LIKE 'Slabbinck C+R', p.transport NOT LIKE 'Slabbinck', p.transport NOT LIKE 'Terryn', p.transport NOT LIKE 'Johan', p.transport, ISNULL(p.expected_time), p.expected_time, p.idPlanning, op.id_ordered_product",
+  "params": [
+    "2026-08-26"
+  ],
+  "durationMs": 1525
+}
+{
+  "timestamp": "2026-08-26 08:24:32",
+  "type": "query",
+  "sql": "UPDATE `batch_info` SET `sap_delivery` = ? WHERE `production_id` = ?",
+  "params": [
+    "10568037",
+    "0100051648"
+  ],
+  "durationMs": 848
+}
+{
+  "timestamp": "2026-08-26 08:44:12",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_confirmation = ? WHERE idPlanning = ? ;",
+  "params": [
+    1,
+    "40955"
+  ],
+  "durationMs": 9
+}
+{
+  "timestamp": "2026-08-26 08:51:04",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_confirmation = ? WHERE idPlanning = ? ;",
+  "params": [
+    1,
+    "40935"
+  ],
+  "durationMs": 9
+}
+{
+  "timestamp": "2026-08-26 09:41:01",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_confirmation = ? WHERE idPlanning = ? ;",
+  "params": [
+    1,
+    "40952"
+  ],
+  "durationMs": 9
+}
+{
+  "timestamp": "2026-08-26 09:49:32",
+  "type": "query",
+  "sql": "SELECT date_format(p.expected_date, '%Y-%m-%d') AS 'expected_date', p.transport, date_format(p.arrival_time, '%H:%i') AS 'arrival_time', date_format(p.departure_time, '%H:%i') AS 'departure_time', o.order_reference, o.customer, op.mixpro_code, op.production_code, op.amount AS 'ordered_volume', bi.en_done AS 'delivered_volume', bi.recipe_name, bi.sap_delivery, c.sap_code FROM planning AS p LEFT JOIN orders AS o ON p.idPlanning = o.transport_id LEFT JOIN ordered_products AS op ON op.order_id = o.order_id LEFT JOIN batch_info AS bi ON op.production_code = bi.production_id LEFT JOIN sap_recipes_codes AS c ON op.mixpro_code = c.mixpro_code WHERE p.departure_time IS NOT NULL AND p.expected_date < '2026-08-26' AND YEAR(p.expected_date) >= YEAR(now()) - 1 ORDER BY p.expected_date DESC, p.departure_time ASC;",
+  "params": [],
+  "durationMs": 765
+}
+{
+  "timestamp": "2026-08-26 09:54:27",
+  "type": "query",
+  "sql": "SELECT date_format(p.expected_date, '%Y-%m-%d') AS 'expected_date', p.transport, date_format(p.arrival_time, '%H:%i') AS 'arrival_time', date_format(p.departure_time, '%H:%i') AS 'departure_time', o.order_reference, o.customer, op.mixpro_code, op.production_code, op.amount AS 'ordered_volume', bi.en_done AS 'delivered_volume', bi.recipe_name, bi.sap_delivery, c.sap_code FROM planning AS p LEFT JOIN orders AS o ON p.idPlanning = o.transport_id LEFT JOIN ordered_products AS op ON op.order_id = o.order_id LEFT JOIN batch_info AS bi ON op.production_code = bi.production_id LEFT JOIN sap_recipes_codes AS c ON op.mixpro_code = c.mixpro_code WHERE p.departure_time IS NOT NULL AND p.expected_date < '2026-08-26' AND YEAR(p.expected_date) >= YEAR(now()) - 1 ORDER BY p.expected_date DESC, p.departure_time ASC;",
+  "params": [],
+  "durationMs": 922
+}
+{
+  "timestamp": "2026-08-26 09:54:46",
+  "type": "query",
+  "sql": "SELECT date_format(p.expected_date, '%Y-%m-%d') AS 'expected_date', p.transport, date_format(p.arrival_time, '%H:%i') AS 'arrival_time', date_format(p.departure_time, '%H:%i') AS 'departure_time', o.order_reference, o.customer, op.mixpro_code, op.production_code, op.amount AS 'ordered_volume', bi.en_done AS 'delivered_volume', bi.recipe_name, bi.sap_delivery, c.sap_code FROM planning AS p LEFT JOIN orders AS o ON p.idPlanning = o.transport_id LEFT JOIN ordered_products AS op ON op.order_id = o.order_id LEFT JOIN batch_info AS bi ON op.production_code = bi.production_id LEFT JOIN sap_recipes_codes AS c ON op.mixpro_code = c.mixpro_code WHERE p.departure_time IS NOT NULL AND p.expected_date < '2026-08-26' AND YEAR(p.expected_date) >= YEAR(now()) - 1 ORDER BY p.expected_date DESC, p.departure_time ASC;",
+  "params": [],
+  "durationMs": 818
+}
+{
+  "timestamp": "2026-08-26 10:08:56",
+  "type": "query",
+  "sql": "SELECT date_format(p.expected_date, '%Y-%m-%d') AS 'expected_date', p.transport, date_format(p.arrival_time, '%H:%i') AS 'arrival_time', date_format(p.departure_time, '%H:%i') AS 'departure_time', o.order_reference, o.customer, op.mixpro_code, op.production_code, op.amount AS 'ordered_volume', bi.en_done AS 'delivered_volume', bi.recipe_name, bi.sap_delivery, c.sap_code FROM planning AS p LEFT JOIN orders AS o ON p.idPlanning = o.transport_id LEFT JOIN ordered_products AS op ON op.order_id = o.order_id LEFT JOIN batch_info AS bi ON op.production_code = bi.production_id LEFT JOIN sap_recipes_codes AS c ON op.mixpro_code = c.mixpro_code WHERE p.departure_time IS NOT NULL AND p.expected_date < '2026-08-26' AND YEAR(p.expected_date) >= YEAR(now()) - 1 ORDER BY p.expected_date DESC, p.departure_time ASC;",
+  "params": [],
+  "durationMs": 801
+}
+{
+  "timestamp": "2026-08-26 10:34:40",
+  "type": "query",
+  "sql": "SELECT date_format(p.expected_date, '%Y-%m-%d') AS 'expected_date', p.transport, date_format(p.arrival_time, '%H:%i') AS 'arrival_time', date_format(p.departure_time, '%H:%i') AS 'departure_time', o.order_reference, o.customer, op.mixpro_code, op.production_code, op.amount AS 'ordered_volume', bi.en_done AS 'delivered_volume', bi.recipe_name, bi.sap_delivery, c.sap_code FROM planning AS p LEFT JOIN orders AS o ON p.idPlanning = o.transport_id LEFT JOIN ordered_products AS op ON op.order_id = o.order_id LEFT JOIN batch_info AS bi ON op.production_code = bi.production_id LEFT JOIN sap_recipes_codes AS c ON op.mixpro_code = c.mixpro_code WHERE p.departure_time IS NOT NULL AND p.expected_date < '2026-08-26' AND YEAR(p.expected_date) >= YEAR(now()) - 1 ORDER BY p.expected_date DESC, p.departure_time ASC;",
+  "params": [],
+  "durationMs": 757
+}
+{
+  "timestamp": "2026-08-26 10:36:34",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_confirmation = ? WHERE idPlanning = ? ;",
+  "params": [
+    1,
+    "40946"
+  ],
+  "durationMs": 8
+}
+{
+  "timestamp": "2026-08-26 11:01:36",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_confirmation = ? WHERE idPlanning = ? ;",
+  "params": [
+    1,
+    "40940"
+  ],
+  "durationMs": 10
+}
+{
+  "timestamp": "2026-08-26 11:22:14",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_confirmation = ? WHERE idPlanning = ? ;",
+  "params": [
+    1,
+    "40942"
+  ],
+  "durationMs": 7
+}
+{
+  "timestamp": "2026-08-26 12:01:52",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_confirmation = ? WHERE idPlanning = ? ;",
+  "params": [
+    1,
+    "40949"
+  ],
+  "durationMs": 16
+}
+{
+  "timestamp": "2026-08-26 12:03:31",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_confirmation = ? WHERE idPlanning = ? ;",
+  "params": [
+    1,
+    "40943"
+  ],
+  "durationMs": 8
+}
+{
+  "timestamp": "2026-08-26 12:29:30",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_confirmation = ? WHERE idPlanning = ? ;",
+  "params": [
+    1,
+    "40966"
+  ],
+  "durationMs": 9
+}
+{
+  "timestamp": "2026-08-26 12:45:02",
+  "type": "query",
+  "sql": "UPDATE `ordered_products` SET `production_code` = ? WHERE `id_ordered_product` = ?",
+  "params": [
+    "0100051659",
+    "39601"
+  ],
+  "durationMs": 1815
+}
+{
+  "timestamp": "2026-08-26 13:34:09",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_confirmation = ? WHERE idPlanning = ? ;",
+  "params": [
+    1,
+    "40954"
+  ],
+  "durationMs": 7
+}
+{
+  "timestamp": "2026-08-26 13:53:57",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_confirmation = ? WHERE idPlanning = ? ;",
+  "params": [
+    1,
+    "40971"
+  ],
+  "durationMs": 9
+}
+{
+  "timestamp": "2026-08-26 14:14:52",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_confirmation = ? WHERE idPlanning = ? ;",
+  "params": [
+    1,
+    "40948"
+  ],
+  "durationMs": 26
+}
+{
+  "timestamp": "2026-08-26 14:42:04",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_confirmation = ? WHERE idPlanning = ? ;",
+  "params": [
+    1,
+    "40941"
+  ],
+  "durationMs": 9
+}
+{
+  "timestamp": "2026-08-26 14:48:00",
+  "type": "query",
+  "sql": "UPDATE `planning` SET `arrival_time` = ? WHERE `idPlanning` = ?",
+  "params": [
+    "14:50",
+    "40977"
+  ],
+  "durationMs": 226
+}
+{
+  "timestamp": "2026-08-26 14:56:09",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_confirmation = ? WHERE idPlanning = ? ;",
+  "params": [
+    1,
+    "40977"
+  ],
+  "durationMs": 9
+}
+{
+  "timestamp": "2026-08-26 15:12:00",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_confirmation = ? WHERE idPlanning = ? ;",
+  "params": [
+    1,
+    "40978"
+  ],
+  "durationMs": 14
+}
+{
+  "timestamp": "2026-08-26 15:26:19",
+  "type": "query",
+  "sql": "SELECT date_format(p.expected_date, '%Y-%m-%d') AS 'expected_date', p.transport, date_format(p.arrival_time, '%H:%i') AS 'arrival_time', date_format(p.departure_time, '%H:%i') AS 'departure_time', o.order_reference, o.customer, op.mixpro_code, op.production_code, op.amount AS 'ordered_volume', bi.en_done AS 'delivered_volume', bi.recipe_name, bi.sap_delivery, c.sap_code FROM planning AS p LEFT JOIN orders AS o ON p.idPlanning = o.transport_id LEFT JOIN ordered_products AS op ON op.order_id = o.order_id LEFT JOIN batch_info AS bi ON op.production_code = bi.production_id LEFT JOIN sap_recipes_codes AS c ON op.mixpro_code = c.mixpro_code WHERE p.departure_time IS NOT NULL AND p.expected_date < '2026-08-26' AND YEAR(p.expected_date) >= YEAR(now()) - 1 ORDER BY p.expected_date DESC, p.departure_time ASC;",
+  "params": [],
+  "durationMs": 802
+}
+{
+  "timestamp": "2026-08-26 15:28:01",
+  "type": "query",
+  "sql": "SELECT date_format(p.expected_date, '%Y-%m-%d') AS 'expected_date', p.transport, date_format(p.arrival_time, '%H:%i') AS 'arrival_time', date_format(p.departure_time, '%H:%i') AS 'departure_time', o.order_reference, o.customer, op.mixpro_code, op.production_code, op.amount AS 'ordered_volume', bi.en_done AS 'delivered_volume', bi.recipe_name, bi.sap_delivery, c.sap_code FROM planning AS p LEFT JOIN orders AS o ON p.idPlanning = o.transport_id LEFT JOIN ordered_products AS op ON op.order_id = o.order_id LEFT JOIN batch_info AS bi ON op.production_code = bi.production_id LEFT JOIN sap_recipes_codes AS c ON op.mixpro_code = c.mixpro_code WHERE p.departure_time IS NOT NULL AND p.expected_date < '2026-08-26' AND YEAR(p.expected_date) >= YEAR(now()) - 1 ORDER BY p.expected_date DESC, p.departure_time ASC;",
+  "params": [],
+  "durationMs": 806
+}
+{
+  "timestamp": "2026-08-26 15:28:19",
+  "type": "query",
+  "sql": "SELECT date_format(p.expected_date, '%Y-%m-%d') AS 'expected_date', p.transport, date_format(p.arrival_time, '%H:%i') AS 'arrival_time', date_format(p.departure_time, '%H:%i') AS 'departure_time', o.order_reference, o.customer, op.mixpro_code, op.production_code, op.amount AS 'ordered_volume', bi.en_done AS 'delivered_volume', bi.recipe_name, bi.sap_delivery, c.sap_code FROM planning AS p LEFT JOIN orders AS o ON p.idPlanning = o.transport_id LEFT JOIN ordered_products AS op ON op.order_id = o.order_id LEFT JOIN batch_info AS bi ON op.production_code = bi.production_id LEFT JOIN sap_recipes_codes AS c ON op.mixpro_code = c.mixpro_code WHERE p.departure_time IS NOT NULL AND p.expected_date < '2026-08-26' AND YEAR(p.expected_date) >= YEAR(now()) - 1 ORDER BY p.expected_date DESC, p.departure_time ASC;",
+  "params": [],
+  "durationMs": 772
+}
+{
+  "timestamp": "2026-08-26 16:08:21",
+  "type": "query",
+  "sql": "UPDATE planning SET arrival_confirmation = ? WHERE idPlanning = ? ;",
+  "params": [
+    1,
+    "40963"
+  ],
+  "durationMs": 9
+}
