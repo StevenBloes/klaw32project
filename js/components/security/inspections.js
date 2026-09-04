@@ -43,6 +43,7 @@ const maps = {
   checkResult: {
     0: { text: "NOK", css: ["result-nok", "numeric-column"] },
     1: { text: "OK", css: ["result-ok", "numeric-column"] },
+    2: { text: "?", css:["result-pending", "numeric-column"]}
   },
   deviationCount: {
     0: { css: ["result-ok", "numeric-column"] },
