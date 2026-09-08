@@ -301,6 +301,17 @@ tbody tr:last-child td {
 	border-right: solid #4EA13F 1px;
 }
 
+.insp-row1 {
+	padding-bottom: 2em;
+	border-bottom: solid #4EA13F 1px;
+}
+
+.v-split {
+	display: flex;
+	flex-direction: column;
+	gap: 2em;
+}
+
 #input-form {
 	padding-top: 1em;
 }
