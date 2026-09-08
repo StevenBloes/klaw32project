@@ -140,7 +140,6 @@ body {
 	color: #2E2E2E;
 	font-size: 1.5em;
 	margin: 0;
-	padding-bottom: 0.5em;
 }
 
 .dash-row {
@@ -514,7 +513,8 @@ td[contenteditable="true"]:focus {
 	border-radius: 6px;
 }
 
-.status-open {
+.status-open,
+.result-cancelled {
 	font-size: 0.9em;
 	padding: 0.1em 0.3em;
 	border-radius: 4px;
@@ -548,7 +548,9 @@ td[contenteditable="true"]:focus {
 	background-color: #F804;
 }
 
-.severity-high {
+.severity-high,
+.status-cancelled,
+.status-overdue {
 	font-size: 0.9em;
 	padding: 0.1em 0.3em;
 	border-radius: 4px;

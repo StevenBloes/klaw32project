@@ -24,10 +24,12 @@ const maps = {
     2: { text: "Niveau 2", css: "security-level-2" },
     3: { text: "Niveau 3", css: "security-level-3" },
   },
-  checkStatus: {
-    PLANNED: { text: "Open", css: ["status-open"] },
+  inspectionStatus: {
+    PLANNED: { text: "Gepland", css: ["status-open"] },
     IN_PROGRESS: { text: "In behandeling", css: ["status-progress"] },
-    DONE: { text: "Afgerond", css: ["status-closed"] },
+    COMPLETED: { text: "Afgerond", css: ["status-closed"] },
+    OVERDUE: { text: "Over tijd", css: ["status-overdue"] },
+    CANCELLED: { text: "Afgelast", css: ["status-cancelled"] }
   },
   deviationStatus: {
     OPEN: { text: "Open", css: ["status-open"] },
@@ -41,9 +43,11 @@ const maps = {
     HIGH: { text: "Hoog", css: ["severity-high"] }
   },
   checkResult: {
-    0: { text: "NOK", css: ["result-nok", "numeric-column"] },
-    1: { text: "OK", css: ["result-ok", "numeric-column"] },
-    2: { text: "?", css:["result-pending", "numeric-column"]}
+    1: { text: "NOK", css: ["result-nok", "numeric-column"] },
+    2: { text: "OK", css: ["result-ok", "numeric-column"] },
+    3: { text: "?", css:["result-pending", "numeric-column"]},
+    4: { text: "Afgelast", css:["result-cancelled", "numeric-column"]},
+    5: { text: "?", css:["result-pending", "numeric-column"]}
   },
   deviationCount: {
     0: { css: ["result-ok", "numeric-column"] },
@@ -52,14 +56,15 @@ const maps = {
 }
 
 const checks_tbl_cols = [
-  { field: "check_id", formatter: value => formatId("INS", value) },
+  { field: "inspection_id", formatter: value => formatId("INS", value) },
   { field: "security_level", cellcss: "numeric-column" },
-  { field: "inspection_date", formatter: value => formatDate(value) },
-  { field: "type" },
-  { field: "area" },
-  { field: "performed_by" },
-  { field: "deviation_count", map: "deviationCount" },
-  { field: "check_status_value", map: "checkStatus", pillow: true }
+  { field: "completed_at", formatter: value => value ? formatDate(value) : "-" },
+  { field: "template_name" },
+ // { field: "area" },
+  { field: "completed_by", formatter: value => value ? value : "-" },
+  { field: "checkpoint_count", cellcss: "numeric-column", default: 0 },
+  { field: "deviation_count", map: "deviationCount", default: 0 },
+  { field: "status", map: "inspectionStatus", pillow: true }
 ];
 
 const checkpoint_tbl_cols = [
@@ -67,7 +72,7 @@ const checkpoint_tbl_cols = [
   { field: "security_level", cellcss: "numeric-column", default: "1" },
   { field: "checkpoint_description" },
   {
-    field: "result", map: "checkResult", default: "1", onclick: (row) => {
+    field: "result", map: "checkResult", default: "3", onclick: (row) => {
       if (MODE === CREATEMODE || MODE === EDITMODE) {
         row.result = row.result ? 0 : 1;
         renderCheckPointTable();
@@ -170,14 +175,14 @@ async function loadData(root) {
 
   try {
     // fetch the records data
-    const checksList = await callApi("getChecksOverview");
+    const checksList = await callApi("getInspectionList");
 
     // insert records rows in inspection table
     checksList.forEach(item => {
       const row = document.createElement("tr");
-      row.id = "INS_" + item.check_id;
+      row.id = "INS_" + item.inspection_id;
       row.onclick = async () => {
-        await loadDetail(root, item.check_id);
+        await loadDetail(root, item.inspection_id);
       };
 
       checks_tbl_cols.forEach(column => {
@@ -205,30 +210,36 @@ async function loadDetail(root, id) {
 
   try {
     // fetch inspection data
-    checkDetailData = await callApi("getFullCheck", { params: id });
+    checkDetailData = await callApi("getInspection", { params: id });
+
+    console.log(checkDetailData);
+
+    const inspectionData = checkDetailData.inspection;
     checkpointData = checkDetailData.items;
     deviationData = checkDetailData.deviations;
 
     // insert the fields
     root.querySelector("#detail-title").textContent = `${formatId("INS", id)} - Inspectie Rapport`;
     root.querySelector("#detail-id").value = `${formatId("INS", id)}`;
-    root.querySelector("#detail-type").value = checkDetailData.check.type;
-    root.querySelector("#detail-date").valueAsDate = formatDateInput(checkDetailData.check.inspection_date);
-    root.querySelector("#detail-time").value = `${formatTime(checkDetailData.check.inspection_time)}`;
-    root.querySelector("#detail-location").value = checkDetailData.check.area;
-    root.querySelector("#detail-executed-by").value = checkDetailData.check.performed_by;
+    root.querySelector("#detail-type").value = inspectionData.template_name;
+    root.querySelector("#detail-date").valueAsDate = formatDateInput(inspectionData.completed_at);
+    root.querySelector("#detail-time").value = `${formatTime(inspectionData.completed_at)}`;
+    root.querySelector("#detail-location").value = "-";
+    root.querySelector("#detail-executed-by").value = inspectionData.completed_by;
     root.querySelector("#detail-function").value = "-";
-    root.querySelector("#detail-security-level").value = checkDetailData.check.security_level;
-    root.querySelector("#detail-remarks").value = checkDetailData.check.remarks;
+    root.querySelector("#detail-security-level").value = "1";
+    root.querySelector("#detail-remarks").value = inspectionData.remarks;
 
     // update the table for checkpoints
     renderCheckPointTable();
+    
+    if(deviationData){
+      // update the deviations counter
+      root.querySelector("#deviationCounter").textContent = deviationData.length;
 
-    // update the deviations counter
-    root.querySelector("#deviationCounter").textContent = checkDetailData.deviations.length;
-
-    // update the table for deviations
-    renderDeviationTable();
+      // update the table for deviations
+      renderDeviationTable();
+    }
 
     loadedInspectionId = id;
     document.querySelector("#edit-btn").disabled = (MODE === CREATEMODE || MODE === EDITMODE || (MODE === VIEWMODE && loadedInspectionId === null));
@@ -254,6 +265,9 @@ function renderCheckPointTable() {
 }
 
 function renderDeviationTable() {
+  if(!deviationTable){
+    return;
+  }
   const deviationTable = document.querySelector("#deviation-tbl");
   deviationTable.innerHTML = "";
 
@@ -388,9 +402,9 @@ export function render(id) {
           <th class="numeric-column">SL</th>
           <th>Datum</th>
           <th>Type</th>
-          <th>Plaats</th>
           <th>Uitgevoerd door</th>
-          <th class="numeric-column">Afwijkingen</th>
+          <th class="numeric-column">#Checkpunten</th>
+          <th class="numeric-column">#Afwijkingen</th>
           <th>Status</th>
         </tr>
       </thead>

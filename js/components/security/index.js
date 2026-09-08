@@ -147,11 +147,11 @@ export async function init(root, id) {
 		highlightActiveNav(root);
 	});
 
-	const checksList = await callApi("getChecksOverview");
+	/*const checksList = await callApi("getChecksOverview");
 	if(root.querySelector("#inspectionCount")){
 		root.querySelector("#inspectionCount").textContent = checksList.length;
 	}
-	
+	*/
 	/* needs to run here when reloading page with child */
 	highlightActiveNav(root);
 }

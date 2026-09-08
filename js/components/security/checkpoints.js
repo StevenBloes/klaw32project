@@ -1,16 +1,20 @@
 export const title = "KLA W32 - Checkpoints";
 
+import { callApi } from "../../services/apiCalls.js";
+
 const VIEWMODE = 0;
 const CREATEMODE = 1;
 const EDITMODE = 2;
 
 let MODE = VIEWMODE;
-
 let loadedTemplateId;
 
-const maps = {
-  checkbox: {
+let checkpointData = [];
 
+const maps = {
+  checkbox: { 
+    0: { text: "\u2610", css: ["result-nok", "numeric-column"] },
+    1: { text: "\u2611", css: ["result-ok", "numeric-column"]}
   }
 };
 
@@ -23,9 +27,12 @@ const inspectionType_tbl_cols = [
 const checkpoint_tbl_cols = [
   { field: "security_level" },
   { field: "description" },
-  { field: "checkpoint_categorie" },
-  { field: "checkpoint_area" },
-  { field: "active", map: "" }
+  { field: "category" },
+  { field: "area" },
+  { field: "active", cellcss: ["numeric-column"], map: "checkbox", onclick: (row) => {
+      row.active = row.active ? 0 : 1;
+      renderCheckPointTable();
+    }}
 ];
 
 const frequencyTypes = [
@@ -48,8 +55,106 @@ const frequencyTypes = [
   }
 ];
 
-async function loadData(){
+async function loadData(root){
+  checkpointData = await callApi("getCheckpoints");
+  console.log(checkpointData);
+  renderCheckPointTable();
 
+  
+}
+
+function createTableCell(rowData, column) {
+
+  const cell = document.createElement("td");
+
+  if (column.editable && MODE !== VIEWMODE) {
+    cell.contentEditable = true;
+
+    cell.addEventListener("focusin", (e) => {
+      cell.dataset.originalValue = cell.textContent;
+    });
+
+    cell.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        cell.textContent = cell.dataset.originalValue ?? "";
+        cell.blur();
+      }
+    });
+
+    cell.addEventListener("blur", (e) => {
+      rowData[column.field] = cell.textContent;
+    });
+  }
+
+
+  if (column.cellcss) {
+    cell.classList.add(...column.cellcss);
+  }
+
+  if (column.onclick) {
+    cell.onclick = () => column.onclick(rowData);
+  }
+
+  let value = rowData[column.field] ?? column.default;
+
+  if (column.formatter) {
+    value = column.formatter(value);
+  }
+
+  if (column.map) {
+    try {
+      const mapItem = maps[column.map][value] ?? maps[column.map]["default"];
+
+      if (column.pillow) {
+        const span = document.createElement("span");
+
+        if (mapItem.css) {
+          span.classList.add(...mapItem.css);
+        }
+
+        if (mapItem.text) {
+          span.textContent = mapItem.text;
+        } else {
+          span.textContent = value;
+        }
+
+        cell.appendChild(span);
+      } else {
+        if (mapItem.css) {
+          cell.classList.add(...mapItem.css);
+        }
+
+        if (mapItem.text) {
+          cell.textContent = mapItem.text;
+        } else {
+          cell.textContent = value;
+        }
+      }
+    } catch (e) {
+      console.log(e.message);
+      console.log(column);
+      console.log(value);
+    }
+  } else {
+    cell.textContent = value;
+  }
+
+  return cell;
+}
+
+function renderCheckPointTable(){
+  const checkpointTable = document.querySelector("#checkpoint-tbl");
+  checkpointTable.innerHTML = "";
+
+  checkpointData.forEach(item => {
+    const row = document.createElement("tr");
+
+    checkpoint_tbl_cols.forEach(column => {
+      row.appendChild(createTableCell(item, column));
+    })
+
+    checkpointTable.appendChild(row);
+  });
 }
 
 async function loadDetail(){
@@ -83,15 +188,16 @@ export function render(id) {
     <div class="insp-col1 v-split">
       <div class="insp-row1">
         <div style="display: flex; justify-content: space-between;">
-          <h3 class="work-panel-title">Inspectietypes (Templates)</h3>
+          <h3 class="work-panel-title">Inspectietypes (Templates)&nbsp;</h3>
           <button id="new-template-btn" class="new-btn logo-text-btn">+ Nieuw Inspectietype</button>
         </div>
+          <br>
           <div class="table-container">
             <table>
               <thead>
                 <tr>
                   <th>Naam</th>
-                  <th>Checkpoints</th>
+                  <th># Checkpunten</th>
                   <th>Actief</th>
                 </tr>
               </thead>
@@ -103,21 +209,22 @@ export function render(id) {
         </div>
         <div>
           <div style="display: flex; justify-content: space-between;">
-            <h3 class="work-panel-title">Checkpoints</h3>
-            <button id="new-checkpoint-btn" class="new-btn logo-text-btn">+ Nieuw checkpoint</button>
+            <h3 class="work-panel-title">Checkpunten</h3>
+            <button id="new-checkpoint-btn" class="new-btn logo-text-btn">+ Nieuw checkpunt</button>
           </div>
+          <br>
           <div class="table-container">
             <table>
               <thead>
                 <tr>
                   <th>SL</th>
-                  <th>Checkpoint</th>
+                  <th>Checkpunt</th>
                   <th>Categorie</th>
                   <th>Locatie</th>
                   <th>Actief</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="checkpoint-tbl">
                 <tr><td>table_content</td></tr>
               </tbody>
             </table>
@@ -164,12 +271,12 @@ export function render(id) {
             </div>
           </div>
         </div>
-        <h3>Checkpoints</h3>
+        <h3>Checkpunten</h3>
         <div class="table-container">
           <table>
             <thead>
               <th>SL</th>
-              <th>Checkpoint</th>
+              <th>Checkpunt</th>
               <th>Categorie</th>
               <th>Location</th>
               <th>Actief</th>

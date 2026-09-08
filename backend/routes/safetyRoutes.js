@@ -1,5 +1,5 @@
 import express from 'express';
-import { runQuery } from '../db/database.js';
+import { runQuery } from "./../lib/db.js";
 
 const router = express.Router();
 
@@ -11,8 +11,15 @@ const router = express.Router();
 router.get('/checkpoints', async (req, res) => {
   try {
     const result = await runQuery(`
-      SELECT *
-      FROM checkpoint
+      SELECT 
+        c.*,
+        cc.value AS category,
+        ca.value AS area
+      FROM safety.checkpoint AS c
+      LEFT JOIN safety.checkpoint_category AS cc
+        ON cc.checkpoint_category_id = c.checkpoint_category_id
+      LEFT JOIN safety.checkpoint_area AS ca
+        ON ca.checkpoint_area_id = c.checkpoint_area_id
       ORDER BY description
     `);
 
@@ -26,8 +33,15 @@ router.get('/checkpoints', async (req, res) => {
 router.get('/checkpoints/:id', async (req, res) => {
   try {
     const result = await runQuery(`
-      SELECT *
-      FROM checkpoint
+      SELECT 
+        c.*,
+        cc.value AS category,
+        ca.value AS area
+      FROM safety.checkpoint AS c
+      LEFT JOIN safety.checkpoint_category AS cc
+        ON cc.checkpoint_category_id = c.checkpoint_category_id
+      LEFT JOIN safety.checkpoint_area AS ca
+        ON ca.checkpoint_area_id = c.checkpoint_area_id
       WHERE checkpoint_id = ?
     `, [req.params.id]);
 
@@ -49,7 +63,7 @@ router.post('/checkpoints', async (req, res) => {
     } = req.body;
 
     const result = await runQuery(`
-      INSERT INTO checkpoint
+      INSERT INTO safety.checkpoint
       (
         checkpoint_category_id,
         checkpoint_area_id,
@@ -88,7 +102,7 @@ router.put('/checkpoints/:id', async (req, res) => {
     } = req.body;
 
     await runQuery(`
-      UPDATE checkpoint
+      UPDATE safety.checkpoint
       SET
         checkpoint_category_id = ?,
         checkpoint_area_id = ?,
@@ -340,9 +354,23 @@ router.get('/inspections', async (req, res) => {
   try {
 
     const result = await runQuery(`
-      SELECT *
-      FROM inspection
-      ORDER BY planned_date DESC
+      SELECT 
+        i.*, 
+        sum(ii.inspection_id) AS checkpoint_count,
+        i_s.value AS status
+      FROM safety.inspection AS i
+      LEFT JOIN safety.inspection_item AS ii
+        ON i.inspection_id = ii.inspection_id
+      LEFT JOIN safety.inspection_status AS i_s
+        ON i.inspection_status_id = i_s.inspection_status_id
+      GROUP BY i.inspection_id
+      ORDER BY 
+        CASE i_s.value 
+          WHEN 'OVERDUE' THEN 1 
+          WHEN 'PLANNED' THEN 2 
+          ELSE 3 
+        END, 
+        i.completed_at  
     `);
 
     res.json(result.rows);
@@ -359,13 +387,13 @@ router.get('/inspections/:id', async (req, res) => {
 
     const inspection = await runQuery(`
       SELECT *
-      FROM inspection
+      FROM safety.inspection
       WHERE inspection_id = ?
     `, [req.params.id]);
 
     const items = await runQuery(`
       SELECT *
-      FROM inspection_item
+      FROM safety.inspection_item
       WHERE inspection_id = ?
       ORDER BY sort_order
     `, [req.params.id]);
@@ -398,14 +426,14 @@ router.post('/inspections', async (req, res) => {
 
     const template = await runQuery(`
       SELECT *
-      FROM inspection_template
+      FROM safety.inspection_template
       WHERE inspection_template_id = ?
     `, [inspection_template_id]);
 
     const templateData = template.rows[0];
 
     const inspectionResult = await runQuery(`
-      INSERT INTO inspection
+      INSERT INTO safety.inspection
       (
         inspection_template_id,
         template_name,
@@ -435,12 +463,12 @@ router.post('/inspections', async (req, res) => {
         cc.value AS category_name,
         txc.required,
         txc.sort_order
-      FROM inspection_template_x_checkpoint txc
-      INNER JOIN checkpoint c
+      FROM safety.inspection_template_x_checkpoint txc
+      INNER JOIN safety.checkpoint c
         ON c.checkpoint_id = txc.checkpoint_id
-      INNER JOIN checkpoint_area ca
+      INNER JOIN safety.checkpoint_area ca
         ON ca.checkpoint_area_id = c.checkpoint_area_id
-      INNER JOIN checkpoint_category cc
+      INNER JOIN safety.checkpoint_category cc
         ON cc.checkpoint_category_id = c.checkpoint_category_id
       WHERE txc.inspection_template_id = ?
       ORDER BY txc.sort_order
@@ -449,7 +477,7 @@ router.post('/inspections', async (req, res) => {
     for (const cp of checkpoints.rows) {
 
       await runQuery(`
-        INSERT INTO inspection_item
+        INSERT INTO safety.inspection_item
         (
           inspection_id,
           checkpoint_id,
@@ -495,7 +523,7 @@ router.put('/inspection-items/:id', async (req, res) => {
     } = req.body;
 
     await runQuery(`
-      UPDATE inspection_item
+      UPDATE safety.inspection_item
       SET
         result = ?,
         remarks = ?

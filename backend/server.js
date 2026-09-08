@@ -11,7 +11,6 @@ import editRoutes from "./routes/editRoutes.js";
 import safetyRoutes from "./routes/safetyRoutes.js"
 
 
-
 const app = express();
 app.use(express.json());
 
