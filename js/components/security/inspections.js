@@ -17,12 +17,19 @@ const formatDate = (value) => `${(new Date(value)).toLocaleDateString("nl-BE")}`
 const formatDateInput = (value) => new Date(value);
 const formatTime = (value) => `${`${String(value).split(":")[0]}:${String(value).split(":")[1]}`}`;
 
+const resultOrder = {
+  1: 5,
+  2: 1,
+  3: 2,
+  4: 3,
+  5: 4
+}
 
 const maps = {
   securityLevel: {
-    1: { text: "Niveau 1", css: "security-level-1" },
-    2: { text: "Niveau 2", css: "security-level-2" },
-    3: { text: "Niveau 3", css: "security-level-3" },
+    1: { text: "Niveau 1", css: ["security-level-1"] },
+    2: { text: "Niveau 2", css: ["security-level-2"] },
+    3: { text: "Niveau 3", css: ["security-level-3"] },
   },
   inspectionStatus: {
     PLANNED: { text: "Gepland", css: ["status-open"] },
@@ -47,7 +54,7 @@ const maps = {
     2: { text: "OK", css: ["result-ok", "numeric-column"] },
     3: { text: "?", css:["result-pending", "numeric-column"]},
     4: { text: "Afgelast", css:["result-cancelled", "numeric-column"]},
-    5: { text: "?", css:["result-pending", "numeric-column"]}
+    5: { text: "Overgeslagen", css:["result-skipped", "numeric-column"]}
   },
   deviationCount: {
     0: { css: ["result-ok", "numeric-column"] },
@@ -57,24 +64,23 @@ const maps = {
 
 const checks_tbl_cols = [
   { field: "inspection_id", formatter: value => formatId("INS", value) },
-  { field: "security_level", cellcss: "numeric-column" },
+  { field: "security_level", cellcss: ["numeric-column"] },
   { field: "completed_at", formatter: value => value ? formatDate(value) : "-" },
   { field: "template_name" },
- // { field: "area" },
   { field: "completed_by", formatter: value => value ? value : "-" },
-  { field: "checkpoint_count", cellcss: "numeric-column", default: 0 },
+  { field: "checkpoint_count", cellcss: ["numeric-column"], default: 0 },
   { field: "deviation_count", map: "deviationCount", default: 0 },
   { field: "status", map: "inspectionStatus", pillow: true }
 ];
 
 const checkpoint_tbl_cols = [
-  { field: "checkpoint_id", cellcss: "numeric-column" },
-  { field: "security_level", cellcss: "numeric-column", default: "1" },
-  { field: "checkpoint_description" },
+  { field: "checkpoint_id", cellcss: ["numeric-column"] },
+  { field: "area" },
+  { field: "description" },
   {
-    field: "result", map: "checkResult", default: "3", onclick: (row) => {
+    field: "result", map: "checkResult", default: 3, onclick: (row) => {
       if (MODE === CREATEMODE || MODE === EDITMODE) {
-        row.result = row.result ? 0 : 1;
+        row.result = resultOrder[row.result];
         renderCheckPointTable();
       }
     }
@@ -224,7 +230,6 @@ async function loadDetail(root, id) {
     root.querySelector("#detail-type").value = inspectionData.template_name;
     root.querySelector("#detail-date").valueAsDate = formatDateInput(inspectionData.completed_at);
     root.querySelector("#detail-time").value = `${formatTime(inspectionData.completed_at)}`;
-    root.querySelector("#detail-location").value = "-";
     root.querySelector("#detail-executed-by").value = inspectionData.completed_by;
     root.querySelector("#detail-function").value = "-";
     root.querySelector("#detail-security-level").value = "1";
@@ -290,7 +295,6 @@ async function clearForm(root) {
   root.querySelector("#detail-type").value = "";
   root.querySelector("#detail-date").valueAsDate = new Date();
   root.querySelector("#detail-time").value = `${(new Date()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-  root.querySelector("#detail-location").value = "";
   root.querySelector("#detail-executed-by").value = "";
   root.querySelector("#detail-function").value = "";
   root.querySelector("#detail-security-level").value = "";
@@ -329,7 +333,6 @@ async function saveData(root) {
     inspection_date: root.querySelector("#detail-date").value,
     inspection_time: root.querySelector("#detail-time").value,
     type: root.querySelector("#detail-type").value,
-    area: root.querySelector("#detail-location").value,
     performed_by: root.querySelector("#detail-executed-by").value,
     security_level: root.querySelector("#detail-security-level").value,
     remarks: root.querySelector("#detail-remarks").value
@@ -379,6 +382,7 @@ function changeMode(mode) {
   document.querySelector("#cancel-btn").disabled = (MODE === VIEWMODE);
   inputForm.querySelector("#save-btn").disabled = (MODE === VIEWMODE);
   inputForm.querySelector("#new-deviation-btn").disabled = (MODE === VIEWMODE);
+  inputForm.querySelector("#add-checkpoint-btn").disabled = (MODE === VIEWMODE);
   inputForm.querySelector("#edit-btn").disabled = (MODE === CREATEMODE || MODE === EDITMODE || (MODE === VIEWMODE && !loadedInspectionId));
   document.querySelector("#new-inspection-btn").disabled = (MODE === CREATEMODE || MODE === EDITMODE);
 
@@ -388,117 +392,114 @@ function changeMode(mode) {
 export function render(id) {
   return `
     <div class="insp-row">
-    <div class="insp-col1">
-    <div style="display: flex; justify-content: space-between;">
-      <h3 class="work-panel-title">Uitgevoerde Inspecties</h3>
-      <button id="new-inspection-btn" class="new-btn logo-text-btn">+ Nieuwe Inspectie</button>
-    </div>
-    <div>filters</div>
-    <div class="table-container">
-    <table id="inspection-tbl">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th class="numeric-column">SL</th>
-          <th>Datum</th>
-          <th>Type</th>
-          <th>Uitgevoerd door</th>
-          <th class="numeric-column">#Checkpunten</th>
-          <th class="numeric-column">#Afwijkingen</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="inspection_tbl">
-      </tbody>
-    </table>
-    </div>
-    </div>
-    <div id="input-form" class="view-mode">
-      <div style="display: flex; justify-content: space-between; align-items: baseline;">
-        <h3 id="detail-title" class="work-panel-title">Inspectie Rapport</h3>
-        <button id="edit-btn" class="action-btn logo-text-btn">&#9998; Bewerken</button>
-      </div>
-      <div class="input-fields">
-        <div class="field-column">
-          <div class="field">
-            <label>Inspectie ID</label>
-            <input id="detail-id"/>
-          </div>
-          <div class="field">
-            <label>Type</label>
-            <input id="detail-type"/>
-          </div>
-          <div class="field">
-            <label>Datum</label>
-            <input type="date" id="detail-date" required/>
-          </div>
-          <div class="field">
-            <label>Tijdstip</label>
-            <input type="time" id="detail-time"/>
-          </div>
+      <div class="insp-col1">
+        <div style="display: flex; justify-content: space-between;">
+          <h3 class="work-panel-title">Uitgevoerde Inspecties</h3>
+          <button id="new-inspection-btn" class="new-btn logo-text-btn">+ Nieuwe Inspectie</button>
         </div>
-        <div class="field-column">
-          <div class="field">
-            <label>Locatie</label>
-            <input id="detail-location"/>
-          </div>
-          <div class="field">
-            <label>Uitgevoerd door</label>
-            <input id="detail-executed-by"/>
-          </div>
-          <div class="field">
-            <label>Functie</label>
-            <input id="detail-function"/>
-          </div>
-          <div class="field">
-            <label>Security Level</label>
-            <input id="detail-security-level"/>
-          </div>
+        <div>filters</div>
+        <div class="table-container">
+          <table id="inspection-tbl">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th class="numeric-column">SL</th>
+                <th>Datum</th>
+                <th>Type</th>
+                <th>Uitgevoerd door</th>
+                <th class="numeric-column">#Checkpunten</th>
+                <th class="numeric-column">#Afwijkingen</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="inspection_tbl"></tbody>
+          </table>
         </div>
       </div>
-      <div style="width: 100%">
-        <label style="vertical-align: top;">Opmerkingen</label>
-        <textarea id="detail-remarks"></textarea>
-      </div>
-      <h4>Checkpoints</h4>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th class="numeric-column">SL</th>
-              <th>Checkpoint</th>
-              <th class="numeric-column">Resultaat</th>
-              <th>Opmerking</th>
-            </tr>
-          </thead>
-          <tbody id="checkpoint-tbl"></tbody>
-        </table>
-      </div>
-      <h4>Waargenomen Afwijkingen (<span id="deviationCounter"></span>)</h4>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Omschrijving</th>
-              <th>Risico</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="deviation-tbl"></tbody>
-        </table>
-      </div>
-      <div style="margin: 2em 0em; display: flex; justify-content: space-between;">
-        <div>
-          <button id="save-btn" class="action-btn logo-text-btn">&#128190; Opslaan</button>
-          <button id="cancel-btn" class="cancel-btn">Annuleren</button>
+      <div id="input-form" class="view-mode">
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <h3 id="detail-title" class="work-panel-title">Inspectie Rapport</h3>
+          <button id="edit-btn" class="action-btn logo-text-btn">&#9998; Bewerken</button>
         </div>
-        <button id="new-deviation-btn" class="new-btn logo-text-btn">+ Nieuwe Afwijking</button>
+        <div class="input-fields">
+          <div class="field-column">
+            <div class="field">
+              <label>Inspectie ID</label>
+              <input id="detail-id"/>
+            </div>
+            <div class="field">
+              <label>Type</label>
+              <input id="detail-type"/>
+            </div>
+            <div class="field">
+              <label>Datum</label>
+              <input type="date" id="detail-date" required/>
+            </div>
+            <div class="field">
+              <label>Tijdstip</label>
+              <input type="time" id="detail-time"/>
+            </div>
+          </div>
+          <div class="field-column">
+            <div class="field">
+              <label>Uitgevoerd door</label>
+              <input id="detail-executed-by"/>
+            </div>
+            <div class="field">
+              <label>Functie</label>
+              <input id="detail-function"/>
+            </div>
+            <div class="field">
+              <label>Security Level</label>
+              <input id="detail-security-level"/>
+            </div>
+          </div>
+        </div>
+        <div style="width: 100%">
+          <label style="vertical-align: top;">Opmerkingen</label>
+          <textarea id="detail-remarks"></textarea>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <h4>Checkpunten</h4>
+          <button id="add-checkpoint-btn" class="new-btn logo-text-btn">+ Checkpunt toevoegen</button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Locatie</th>
+                <th>Checkpoint</th>
+                <th class="numeric-column">Resultaat</th>
+                <th>Opmerking</th>
+              </tr>
+            </thead>
+            <tbody id="checkpoint-tbl"></tbody>
+          </table>
+        </div>
+        <h4>Waargenomen Afwijkingen (<span id="deviationCounter"></span>)</h4>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Omschrijving</th>
+                <th>Risico</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="deviation-tbl"></tbody>
+          </table>
+        </div>
+        <div style="margin: 2em 0em; display: flex; justify-content: space-between;">
+          <div>
+            <button id="save-btn" class="action-btn logo-text-btn">&#128190; Opslaan</button>
+            <button id="cancel-btn" class="cancel-btn">Annuleren</button>
+          </div>
+          <button id="new-deviation-btn" class="new-btn logo-text-btn">+ Nieuwe Afwijking</button>
+        </div>
       </div>
     </div>
-    </div>
-    
   `;
 }
 

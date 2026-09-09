@@ -12,7 +12,9 @@ router.get('/checkpoints', async (req, res) => {
   try {
     const result = await runQuery(`
       SELECT 
-        c.*,
+        c.checkpoint_id,
+        c.description,
+        c.active,
         cc.value AS category,
         ca.value AS area
       FROM safety.checkpoint AS c
@@ -136,8 +138,13 @@ router.get('/inspection-templates', async (req, res) => {
   try {
 
     const result = await runQuery(`
-      SELECT *
-      FROM inspection_template
+      SELECT 
+        it.*,
+        sum(it.inspection_template_id) AS checkpoint_count
+      FROM safety.inspection_template AS it
+      INNER JOIN safety.inspection_template_x_checkpoint AS itxc
+        ON it.inspection_template_id = itxc.inspection_template_id
+      GROUP BY it.inspection_template_id
       ORDER BY name
     `);
 
@@ -154,7 +161,7 @@ router.get('/inspection-templates/:id', async (req, res) => {
 
     const template = await runQuery(`
       SELECT *
-      FROM inspection_template
+      FROM safety.inspection_template
       WHERE inspection_template_id = ?
     `, [req.params.id]);
 
@@ -164,8 +171,8 @@ router.get('/inspection-templates/:id', async (req, res) => {
         txc.sort_order,
         txc.required,
         c.*
-      FROM inspection_template_x_checkpoint txc
-      INNER JOIN checkpoint c
+      FROM safety.inspection_template_x_checkpoint txc
+      INNER JOIN safety.checkpoint c
         ON c.checkpoint_id = txc.checkpoint_id
       WHERE txc.inspection_template_id = ?
       ORDER BY txc.sort_order
@@ -180,6 +187,73 @@ router.get('/inspection-templates/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Get all templates including their checkpoints
+router.get('/inspection-templates-full', async (req, res) => {
+  try {
+    const result = await runQuery(`
+      SELECT
+        t.*,
+        txc.sort_order,
+        txc.required,
+        c.checkpoint_id,
+        c.description AS checkpoint_description,
+        c.remarks AS checkpoint_remarks,
+        c.active AS checkpoint_active,
+        cc.value AS category,
+        ca.value AS area
+      FROM safety.inspection_template t
+      LEFT JOIN safety.inspection_template_x_checkpoint txc
+        ON txc.inspection_template_id = t.inspection_template_id
+      LEFT JOIN safety.checkpoint c
+        ON c.checkpoint_id = txc.checkpoint_id
+      LEFT JOIN safety.checkpoint_category AS cc
+        ON cc.checkpoint_category_id = c.checkpoint_category_id
+      LEFT JOIN safety.checkpoint_area AS ca
+        ON ca.checkpoint_area_id = c.checkpoint_area_id
+      ORDER BY t.name, txc.sort_order
+    `);
+
+    const templates = {};
+
+    result.rows.forEach(row => {
+      const id = row.inspection_template_id;
+
+      if (!templates[id]) {
+        templates[id] = {
+          inspection_template_id: row.inspection_template_id,
+          name: row.name,
+          description: row.description,
+          frequency_type_id: row.frequency_type_id,
+          frequency_value: row.frequency_value,
+          anchor_date: row.anchor_date,
+          active: row.active,
+          version: row.version,
+          updated_at: row.updated_at,
+          checkpoints: []
+        };
+      }
+
+      if (row.checkpoint_id) {
+        templates[id].checkpoints.push({
+          checkpoint_id: row.checkpoint_id,
+          sort_order: row.sort_order,
+          required: row.required,
+          description: row.checkpoint_description,
+          remarks: row.checkpoint_remarks,
+          category: row.category,
+          area: row.area
+        });
+      }
+    });
+
+    res.json(Object.values(templates));
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // Create template
 router.post('/inspection-templates', async (req, res) => {
@@ -197,7 +271,7 @@ router.post('/inspection-templates', async (req, res) => {
     } = req.body;
 
     const result = await runQuery(`
-      INSERT INTO inspection_template
+      INSERT INTO safety.inspection_template
       (
         frequency_type_id,
         name,
@@ -244,7 +318,7 @@ router.put('/inspection-templates/:id', async (req, res) => {
     } = req.body;
 
     await runQuery(`
-      UPDATE inspection_template
+      UPDATE safety.inspection_template
       SET
         frequency_type_id = ?,
         name = ?,
@@ -290,7 +364,7 @@ router.post('/inspection-templates/:id/checkpoints', async (req, res) => {
     } = req.body;
 
     const result = await runQuery(`
-      INSERT INTO inspection_template_x_checkpoint
+      INSERT INTO safety.inspection_template_x_checkpoint
       (
         checkpoint_id,
         inspection_template_id,
@@ -325,7 +399,7 @@ router.put('/template-checkpoints/:id', async (req, res) => {
     } = req.body;
 
     await runQuery(`
-      UPDATE inspection_template_x_checkpoint
+      UPDATE safety.inspection_template_x_checkpoint
       SET
         sort_order = ?,
         required = ?
@@ -459,6 +533,7 @@ router.post('/inspections', async (req, res) => {
       SELECT
         c.checkpoint_id,
         c.description,
+        c.active,
         ca.value AS area_name,
         cc.value AS category_name,
         txc.required,

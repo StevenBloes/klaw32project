@@ -1,0 +1,46 @@
+.modal {
+    position: fixed;
+    inset: 0;
+    background: #0002;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-content {
+    background: white;
+    padding: 1em;
+    border-radius: 8px;
+    min-width: 200px;
+    box-shadow: 4px 4px 4px #0003;
+}
+
+.modal-input-field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.5em;
+}
+
+.modal-input-field input,
+.modal-input-field textarea {
+	border: 1px solid #d1d5db;
+	border-radius: 6px;
+	padding: 0.2em;
+	background: #fefefe;
+}
+
+.modal-input-field input:focus,
+.modal-input-field textarea:focus {
+    border-color: #4ea13f;
+	box-shadow: 0 0 3px #4EA13F;
+	outline: none;
+}
+
+.modal-content input[type="checkbox"] {
+    transform: scale(1.1);
+}
+
+.hidden {
+    display: none;
+}

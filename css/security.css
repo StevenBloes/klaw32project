@@ -500,21 +500,43 @@ td[contenteditable="true"]:focus {
 	color: purple;
 }
 
+.result-skipped {
+	font-size: 0.9em;
+	font-weight: 600;
+	color: orange;
+}
+
+.result-cancelled {
+	font-size: 0.9em;
+	font-weight: 600;
+	color: gray;
+}
+
 .edit-mode .result-ok,
-.edit-mode .result-nok {
+.edit-mode .result-nok,
+.edit-mode .result-pending,
+.edit-mode .result-skipped,
+.edit-mode .result-cancelled {
 	cursor: pointer;
 	user-select: none;	
 }
 
+.edit-mode .result-pending {
+	background-color: #FC06;
+	border-radius: 6px;
+}
+
 .edit-mode .result-ok:hover,
-.edit-mode .result-nok:hover {
+.edit-mode .result-nok:hover,
+.edit-mode .result-pending:hover,
+.edit-mode .result-skipped:hover,
+.edit-mode .result-cancelled:hover {
 	cursor: pointer;
 	background-color: #A0A1;
 	border-radius: 6px;
 }
 
-.status-open,
-.result-cancelled {
+.status-open {
 	font-size: 0.9em;
 	padding: 0.1em 0.3em;
 	border-radius: 4px;

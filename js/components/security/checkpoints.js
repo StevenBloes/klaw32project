@@ -10,18 +10,24 @@ let MODE = VIEWMODE;
 let loadedTemplateId;
 
 let checkpointData = [];
+let templateData = [];
 
 const maps = {
-  checkbox: { 
+  checkbox: {
     0: { text: "\u2610", css: ["result-nok", "numeric-column"] },
-    1: { text: "\u2611", css: ["result-ok", "numeric-column"]}
+    1: { text: "\u2611", css: ["result-ok", "numeric-column"] }
   }
 };
 
-const inspectionType_tbl_cols = [
+const template_tbl_cols = [
   { field: "name" },
-  { field: "checkpoint_count" },
-  { field: "active", map: "" }
+  { field: "checkpoint_count", cellcss: ["numeric-column"] },
+  {
+    field: "active", map: "checkbox", onclick: (row) => {
+      row.active = row.active ? 0 : 1;
+      renderTemplateTable();
+    }
+  }
 ];
 
 const checkpoint_tbl_cols = [
@@ -29,10 +35,12 @@ const checkpoint_tbl_cols = [
   { field: "description" },
   { field: "category" },
   { field: "area" },
-  { field: "active", cellcss: ["numeric-column"], map: "checkbox", onclick: (row) => {
+  {
+    field: "active", cellcss: ["numeric-column"], map: "checkbox", onclick: (row) => {
       row.active = row.active ? 0 : 1;
       renderCheckPointTable();
-    }}
+    }
+  }
 ];
 
 const frequencyTypes = [
@@ -55,12 +63,16 @@ const frequencyTypes = [
   }
 ];
 
-async function loadData(root){
+async function loadData(root) {
+  templateData = await callApi("getTemplates");
+  console.log(templateData);
+  renderTemplateTable();
+
   checkpointData = await callApi("getCheckpoints");
   console.log(checkpointData);
   renderCheckPointTable();
 
-  
+
 }
 
 function createTableCell(rowData, column) {
@@ -142,7 +154,7 @@ function createTableCell(rowData, column) {
   return cell;
 }
 
-function renderCheckPointTable(){
+function renderCheckPointTable() {
   const checkpointTable = document.querySelector("#checkpoint-tbl");
   checkpointTable.innerHTML = "";
 
@@ -157,11 +169,26 @@ function renderCheckPointTable(){
   });
 }
 
-async function loadDetail(){
+function renderTemplateTable() {
+  const templateTable = document.querySelector("#template-tbl");
+  templateTable.innerHTML = "";
+
+  templateData.forEach(item => {
+    const row = document.createElement("tr");
+
+    template_tbl_cols.forEach(column => {
+      row.appendChild(createTableCell(item, column));
+    })
+
+    templateTable.appendChild(row);
+  });
+}
+
+async function loadDetail() {
 
 }
 
-function clearForm(){
+function clearForm() {
 
 }
 
@@ -182,13 +209,77 @@ function changeMode(mode) {
   renderCheckPointTable();
 }
 
+async function renderCheckpointInput() {
+  const modal = document.querySelector("#modal-root");
+  modal.classList.toggle("hidden");
+
+  const modalContent = document.querySelector("#modal-content");
+
+  modalContent.innerHTML = `
+    <div>
+      <h2 style="margin: 0em;">Nieuw Checkpunt</h2>
+      <div style="margin: 0.5em; margin-bottom: 1em;">
+        <div class="modal-input-field">
+          <label>Naam</label>
+          <input id="modal-description-fld" type="text" />
+        </div>
+        <div class="modal-input-field">
+          <label>Categorie</label>
+          <input id="modal-category-fld" type="text" />
+        </div>
+        <div class="modal-input-field">
+          <label>Locatie</label>
+          <input id="modal-area-fld" type="text" />
+        </div>
+        <div class="modal-input-field">
+          <label>Opmerkingen</label>
+          <textarea id="modal-remarks-fld"></textarea>
+        </div>
+        <div>
+          <input id="modal-active-fld" checked type="checkbox" />
+          <label for="modal-active-fld">Actief</label>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: row; justify-content: space-between;">
+        <button id="save-modal-btn" class="new-btn">Opslaan</button>
+        <button id="cancel-modal-btn" class="cancel-btn">Annuleren</button>
+      </div>
+    </div>
+  `;
+
+  document.querySelector("#save-modal-btn").onclick = async () => {
+    const bodyContent = {
+      description: document.querySelector("#modal-description-fld").value,
+      checkpoint_category_id: document.querySelector("#modal-category-fld").value,
+      checkpoint_area_id: document.querySelector("#modal-area-fld").value,
+      remarks: document.querySelector("#modal-remarks-fld").value,
+      active: document.querySelector("#modal-active-fld").checked
+    };
+
+    console.log(bodyContent);
+    /*
+    const result = await callApi("bulkCreateCheckItems", {
+      body: bodyContent
+    });
+    console.log(result);
+*/
+   // modalContent.innerHTML = "";
+    modal.classList.toggle("hidden");
+  };
+
+  document.querySelector("#cancel-modal-btn").onclick = () => {
+    modalContent.innerHTML = "";
+    modal.classList.toggle("hidden");
+  };
+}
+
 export function render(id) {
   return `
   <div class="insp-row">
     <div class="insp-col1 v-split">
       <div class="insp-row1">
         <div style="display: flex; justify-content: space-between;">
-          <h3 class="work-panel-title">Inspectietypes (Templates)&nbsp;</h3>
+          <h3 class="work-panel-title">Inspectietypes &nbsp;</h3>
           <button id="new-template-btn" class="new-btn logo-text-btn">+ Nieuw Inspectietype</button>
         </div>
           <br>
@@ -201,9 +292,7 @@ export function render(id) {
                   <th>Actief</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr><td>table_content</td></tr>
-              </tbody>
+              <tbody id="template-tbl"></tbody>
             </table>
           </div>
         </div>
@@ -224,9 +313,7 @@ export function render(id) {
                   <th>Actief</th>
                 </tr>
               </thead>
-              <tbody id="checkpoint-tbl">
-                <tr><td>table_content</td></tr>
-              </tbody>
+              <tbody id="checkpoint-tbl"></tbody>
             </table>
           </div>
         </div>
@@ -315,13 +402,17 @@ export async function init(root, id) {
     }
   };
 
+  root.querySelector("#new-checkpoint-btn").onclick = async () => {
+    await renderCheckpointInput();
+  };
+
   root.querySelector("#save-btn").onclick = async () => {
     await saveData(root);
   };
 
   root.querySelector("#cancel-btn").onclick = async () => {
     changeMode(VIEWMODE);
-    if(loadedTemplateId){
+    if (loadedTemplateId) {
       await loadDetail(root, loadedTemplateId);
     } else {
       await clearForm(root);
