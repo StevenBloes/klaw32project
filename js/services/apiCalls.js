@@ -18,7 +18,8 @@ const endpoints = {
   getInspection: { url: (id) => `/safety/inspections/${id}`, method: 'GET' },
   getTemplates: { url: `/safety/inspection-templates`, method: 'GET' },
   getTemplatesFull: { url: `/safety/inspection-templates`, method: 'GET' },
-  createInspection: { url: `/safety/inspection`, method: 'POST'}
+  createInspection: { url: `/safety/inspections`, method: 'POST'},
+  createCheckpoint: { url: `/safety/checkpoints`, method: 'POST' }
   
 };
 
