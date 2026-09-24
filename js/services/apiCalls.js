@@ -17,9 +17,16 @@ const endpoints = {
   getInspectionList: { url: `/safety/inspections`, method: 'GET'},
   getInspection: { url: (id) => `/safety/inspections/${id}`, method: 'GET' },
   getTemplates: { url: `/safety/inspection-templates`, method: 'GET' },
+  getTemplate: { url: (id) => `/safety/inspection-templates/${id}`, method: 'GET' },
   getTemplatesFull: { url: `/safety/inspection-templates`, method: 'GET' },
+  createTemplate: { url: `/safety/inspection-templates`, method: 'POST'},
+  updateTemplate: {url: (id) => `/safety/inspection-templates/${id}`, method: 'PUT'},
+  updateTemplateActive: { url: (id) => `/safety/inspection-template/active/${id}`, method: 'PUT' },
   createInspection: { url: `/safety/inspections`, method: 'POST'},
-  createCheckpoint: { url: `/safety/checkpoints`, method: 'POST' }
+  getReferenceValues: { url: `/safety/reference-values`, method: 'GET'},
+  createCheckpoint: { url: `/safety/checkpoints`, method: 'POST' },
+  updateCheckpoint: { url: (id) => `/safety/checkpoints/${id}`, method: 'PUT' },  
+  updateCheckpointActive: { url: (id) => `/safety/checkpoint/active/${id}`, method: 'PUT'}
   
 };
 
@@ -59,6 +66,7 @@ export async function callApi(name, { params, body } = {}) {
 
     if (!response.ok) {
       console.error(`HTTP error: ${response.status}`);
+      console.error(`Details: ${response}`)
       throw new Error(`HTTP error: ${response.status}`);
     }
 

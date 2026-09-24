@@ -1,7 +1,10 @@
 import express from 'express';
-import { runQuery } from '../db/database.js';
+import { runQuery } from '../lib/db.js';
 
 const router = express.Router();
+
+
+
 
 /*************************************************************
  * CHECKPOINTS

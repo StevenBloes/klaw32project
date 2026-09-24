@@ -1,0 +1,40 @@
+Product Name:
+    Embarcadero InterBase 15 [instance = interbase]  
+Install Folder:
+    C:\Program Files\Embarcadero\InterBase  
+Product Features:
+    Server
+    Client
+ 
+‪Port Number
+    ‪3051  
+‪Instance Name
+    ‪interbase  
+Disk Space Information (for Installation Target): 
+    Required:
+399.811.903 Bytes
+    Available:
+214.387.486.720 Bytes
+
+THIS IS AN AUTO-GENERATED MESSAGE - PLEASE DO NOT REPLY TO THIS MESSAGE
+
+
+Product: InterBase 15 Developer Edition
+
+Serial Number(s): L4FD-7VD72M-U77XAG-CCF3
+
+Login Name: steven.bloes@mail.com
+
+First Name: Steven
+
+Last Name: Bloes
+
+
+
+This is a resend of your activation information. Please register your Embarcadero product using the serial number provided.
+
+Thank you for choosing Embarcadero award-winning products. You've joined millions of developers worldwide who are creating great software with our tools. We appreciate your business and welcome you to our community.
+
+Kind regards,
+
+The Embarcadero Team 

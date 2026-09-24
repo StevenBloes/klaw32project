@@ -46,6 +46,11 @@ body {
 	overflow: hidden;
 }
 
+h3 {
+	margin-top: 0.7em;
+	margin-bottom: 0.5em;
+}
+
 .view {
 	flex: 1;
 	margin: 0.5em 1em;
@@ -353,7 +358,6 @@ textarea {
 .view-mode input,
 .view-mode select,
 .view-mode textarea {
-	width: 50%;
 	border: 1px solid #FFF0;
 	border-radius: none;
 	padding: 8px 12px;
@@ -375,7 +379,6 @@ textarea {
 .edit-mode input,
 .edit-mode select,
 .edit-mode textarea {
-	width: 50%;
 	border: 1px solid #d1d5db;
 	border-radius: 6px;
 	padding: 8px 12px;
@@ -415,6 +418,7 @@ td[contenteditable="true"]:focus {
 	font-size: 1.0em;
 	padding: 0.3em 0.6em;
 	line-height: 1;
+	user-select: none;
 }
 
 .new-btn:hover {
@@ -435,6 +439,7 @@ td[contenteditable="true"]:focus {
 	font-size: 1.0em;
 	padding: 0.3em 0.6em;
 	line-height: 1;
+	user-select: none;
 }
 
 .action-btn {
@@ -447,6 +452,7 @@ td[contenteditable="true"]:focus {
 	padding: 0.3em 0.6em;
 	cursor: pointer;
 	line-height: 1;
+	user-select: none;
 }
 
 .action-btn:hover {
@@ -472,6 +478,35 @@ td[contenteditable="true"]:focus {
 .logo-text-btn {
 	padding: 0.3em 0.6em 0.3em 0.25em;
 	line-height: 1;
+	user-select: none;
+}
+
+.edit-pencil {
+	color: #00F9;
+}
+
+.edit-pencil:hover {
+	background-color: #6661;
+	color: #00F;
+}
+
+.checked-cell {
+	text-align: center;
+    font-size: 0.9em;
+	font-weight: 600;
+	color: var(--green-text-color);
+}
+
+.unchecked-cell {
+	text-align: center;
+	font-size: 0.9em;
+	font-weight: 600;
+	color: red;
+}
+
+.checked-cell:hover,
+.unchecked-cell:hover {
+	background-color: #6661;
 }
 
 /***************************************************************************

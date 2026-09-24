@@ -52,9 +52,9 @@ const maps = {
   checkResult: {
     1: { text: "NOK", css: ["result-nok", "numeric-column"] },
     2: { text: "OK", css: ["result-ok", "numeric-column"] },
-    3: { text: "?", css:["result-pending", "numeric-column"]},
-    4: { text: "Afgelast", css:["result-cancelled", "numeric-column"]},
-    5: { text: "Overgeslagen", css:["result-skipped", "numeric-column"]}
+    3: { text: "?", css: ["result-pending", "numeric-column"] },
+    4: { text: "Afgelast", css: ["result-cancelled", "numeric-column"] },
+    5: { text: "Overgeslagen", css: ["result-skipped", "numeric-column"] }
   },
   deviationCount: {
     0: { css: ["result-ok", "numeric-column"] },
@@ -237,8 +237,8 @@ async function loadDetail(root, id) {
 
     // update the table for checkpoints
     renderCheckPointTable();
-    
-    if(deviationData){
+
+    if (deviationData) {
       // update the deviations counter
       root.querySelector("#deviationCounter").textContent = deviationData.length;
 
@@ -259,18 +259,20 @@ function renderCheckPointTable() {
   checkpointTable.innerHTML = "";
 
   checkpointData.forEach(item => {
-    const row = document.createElement("tr");
+    if (item.active) {
+      const row = document.createElement("tr");
 
-    checkpoint_tbl_cols.forEach(column => {
-      row.appendChild(createTableCell(item, column));
-    })
+      checkpoint_tbl_cols.forEach(column => {
+        row.appendChild(createTableCell(item, column));
+      })
 
-    checkpointTable.appendChild(row);
+      checkpointTable.appendChild(row);
+    }
   });
 }
 
 function renderDeviationTable() {
-  if(!deviationTable){
+  if (!deviationTable) {
     return;
   }
   const deviationTable = document.querySelector("#deviation-tbl");
@@ -303,6 +305,7 @@ async function clearForm(root) {
   checkpointData = await callApi("getCheckpoints");
 
   checkpointData.forEach(checkpoint => {
+
     checkpoint_tbl_cols.forEach(column => {
       const cell = createTableCell(checkpoint, column);
 
@@ -319,6 +322,7 @@ async function clearForm(root) {
         }
       }
     });
+
   });
 
   renderCheckPointTable();
@@ -407,7 +411,7 @@ export function render(id) {
                 <th>Datum</th>
                 <th>Type</th>
                 <th>Uitgevoerd door</th>
-                <th class="numeric-column">#Checkpunten</th>
+                <th class="numeric-column">#Checkpoints</th>
                 <th class="numeric-column">#Afwijkingen</th>
                 <th>Status</th>
               </tr>
@@ -460,8 +464,8 @@ export function render(id) {
           <textarea id="detail-remarks"></textarea>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: baseline;">
-          <h4>Checkpunten</h4>
-          <button id="add-checkpoint-btn" class="new-btn logo-text-btn">+ Checkpunt toevoegen</button>
+          <h4>Checkpoints</h4>
+          <button id="add-checkpoint-btn" class="new-btn logo-text-btn">+ Checkpoint toevoegen</button>
         </div>
         <div class="table-container">
           <table>
@@ -526,7 +530,7 @@ export async function init(root, id) {
 
   root.querySelector("#cancel-btn").onclick = async () => {
     changeMode(VIEWMODE);
-    if(loadedInspectionId){
+    if (loadedInspectionId) {
       await loadDetail(root, loadedInspectionId);
     } else {
       await clearForm(root);

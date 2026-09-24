@@ -4,6 +4,41 @@ import { runQuery } from "./../lib/db.js";
 const router = express.Router();
 
 /*************************************************************
+ * REFERENCE VALUES
+ *************************************************************/
+
+// get lookup/reference values
+router.get('/reference-values', async (req, res) => {
+  try {	
+    const areas = await runQuery(`
+	  SELECT * 
+	  FROM safety.checkpoint_area
+	  ORDER BY value
+    `);
+	
+	const categories = await runQuery(`
+	  SELECT * 
+	  FROM safety.checkpoint_category
+	  ORDER BY value
+    `);
+	
+	const frequency_types = await runQuery(`
+	  SELECT * 
+	  FROM safety.frequency_type
+	  ORDER BY frequency_type_id
+	`);
+	
+    res.json({
+      areas: areas.rows,
+	  categories: categories.rows,
+	  frequencyTypes: frequency_types.rows
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/*************************************************************
  * CHECKPOINTS
  *************************************************************/
 
@@ -14,8 +49,11 @@ router.get('/checkpoints', async (req, res) => {
       SELECT 
         c.checkpoint_id,
         c.description,
+		c.remarks,
         c.active,
+		c.checkpoint_category_id,
         cc.value AS category,
+		c.checkpoint_area_id,
         ca.value AS area
       FROM safety.checkpoint AS c
       LEFT JOIN safety.checkpoint_category AS cc
@@ -128,6 +166,26 @@ router.put('/checkpoints/:id', async (req, res) => {
   }
 });
 
+// Set checkpoint active
+router.put('/checkpoint/active/:id', async (req, res) => {
+  try {
+	const {
+		active
+	} = req.body;
+	await runQuery(`
+	  UPDATE safety.checkpoint
+	  SET
+	    active = ?
+	  WHERE checkpoint_id = ?
+	`, [
+	  active,
+	  req.params.id
+	]);	
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 /*************************************************************
  * INSPECTION TEMPLATES
@@ -140,9 +198,9 @@ router.get('/inspection-templates', async (req, res) => {
     const result = await runQuery(`
       SELECT 
         it.*,
-        sum(it.inspection_template_id) AS checkpoint_count
+        coalesce(sum(itxc.inspection_template_id), 0) AS checkpoint_count
       FROM safety.inspection_template AS it
-      INNER JOIN safety.inspection_template_x_checkpoint AS itxc
+      LEFT JOIN safety.inspection_template_x_checkpoint AS itxc
         ON it.inspection_template_id = itxc.inspection_template_id
       GROUP BY it.inspection_template_id
       ORDER BY name
@@ -265,9 +323,7 @@ router.post('/inspection-templates', async (req, res) => {
       name,
       description,
       frequency_value,
-      anchor_date,
-      active,
-      version
+      anchor_date
     } = req.body;
 
     const result = await runQuery(`
@@ -282,15 +338,13 @@ router.post('/inspection-templates', async (req, res) => {
         version,
         updated_at
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+      VALUES (?, ?, ?, ?, ?, 1, 1, NOW())
     `, [
       frequency_type_id,
       name,
       description,
       frequency_value,
-      anchor_date,
-      active,
-      version
+      anchor_date
     ]);
 
     res.status(201).json({
@@ -313,8 +367,6 @@ router.put('/inspection-templates/:id', async (req, res) => {
       description,
       frequency_value,
       anchor_date,
-      active,
-      version
     } = req.body;
 
     await runQuery(`
@@ -325,8 +377,6 @@ router.put('/inspection-templates/:id', async (req, res) => {
         description = ?,
         frequency_value = ?,
         anchor_date = ?,
-        active = ?,
-        version = ?,
         updated_at = NOW()
       WHERE inspection_template_id = ?
     `, [
@@ -335,8 +385,6 @@ router.put('/inspection-templates/:id', async (req, res) => {
       description,
       frequency_value,
       anchor_date,
-      active,
-      version,
       req.params.id
     ]);
 
@@ -347,6 +395,25 @@ router.put('/inspection-templates/:id', async (req, res) => {
   }
 });
 
+// Set template active
+router.put('/inspection-template/active/:id', async (req, res) => {
+  try {
+	const {
+		active
+	} = req.body;
+	await runQuery(`
+	  UPDATE safety.inspection_template
+	  SET
+	    active = ?
+	  WHERE inspection_template_id = ?
+	`, [
+	  active,
+	  req.params.id
+	]);	
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 /*************************************************************
  * TEMPLATE CHECKPOINTS
