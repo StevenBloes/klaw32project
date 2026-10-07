@@ -9,29 +9,29 @@ const router = express.Router();
 
 // get lookup/reference values
 router.get('/reference-values', async (req, res) => {
-  try {	
+  try {
     const areas = await runQuery(`
 	  SELECT * 
 	  FROM safety.checkpoint_area
 	  ORDER BY value
     `);
-	
-	const categories = await runQuery(`
+
+    const categories = await runQuery(`
 	  SELECT * 
 	  FROM safety.checkpoint_category
 	  ORDER BY value
     `);
-	
-	const frequency_types = await runQuery(`
+
+    const frequency_types = await runQuery(`
 	  SELECT * 
 	  FROM safety.frequency_type
 	  ORDER BY frequency_type_id
 	`);
-	
+
     res.json({
       areas: areas.rows,
-	  categories: categories.rows,
-	  frequencyTypes: frequency_types.rows
+      categories: categories.rows,
+      frequencyTypes: frequency_types.rows
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -169,18 +169,18 @@ router.put('/checkpoints/:id', async (req, res) => {
 // Set checkpoint active
 router.put('/checkpoint/active/:id', async (req, res) => {
   try {
-	const {
-		active
-	} = req.body;
-	await runQuery(`
+    const {
+      active
+    } = req.body;
+    await runQuery(`
 	  UPDATE safety.checkpoint
 	  SET
 	    active = ?
 	  WHERE checkpoint_id = ?
 	`, [
-	  active,
-	  req.params.id
-	]);	
+      active,
+      req.params.id
+    ]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -198,7 +198,7 @@ router.get('/inspection-templates', async (req, res) => {
     const result = await runQuery(`
       SELECT 
         it.*,
-        coalesce(sum(itxc.inspection_template_id), 0) AS checkpoint_count
+        COUNT(itxc.inspection_template_id) AS checkpoint_count
       FROM safety.inspection_template AS it
       LEFT JOIN safety.inspection_template_x_checkpoint AS itxc
         ON it.inspection_template_id = itxc.inspection_template_id
@@ -206,7 +206,12 @@ router.get('/inspection-templates', async (req, res) => {
       ORDER BY name
     `);
 
-    res.json(result.rows);
+    const rows = result.rows.map(row => ({
+      ...row,
+      checkpoint_count: Number(row.checkpoint_count)
+    }));
+
+    res.json(rows);
 
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -398,18 +403,18 @@ router.put('/inspection-templates/:id', async (req, res) => {
 // Set template active
 router.put('/inspection-template/active/:id', async (req, res) => {
   try {
-	const {
-		active
-	} = req.body;
-	await runQuery(`
+    const {
+      active
+    } = req.body;
+    await runQuery(`
 	  UPDATE safety.inspection_template
 	  SET
 	    active = ?
 	  WHERE inspection_template_id = ?
 	`, [
-	  active,
-	  req.params.id
-	]);	
+      active,
+      req.params.id
+    ]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -456,31 +461,69 @@ router.post('/inspection-templates/:id/checkpoints', async (req, res) => {
 });
 
 // Update template checkpoint
-router.put('/template-checkpoints/:id', async (req, res) => {
-
+router.put('/inspection-templates/:id/checkpoints', async (req, res) => {
   try {
+    const { checkpoints } = req.body;
 
-    const {
-      sort_order,
-      required
-    } = req.body;
+    // Get existing checkpoints for template
+    const existingRows = await runQuery(`
+        SELECT
+          id,
+          checkpoint_id
+        FROM safety.inspection_template_x_checkpoint
+        WHERE inspection_template_id = ?
+      `, [req.params.id]);
 
-    await runQuery(`
-      UPDATE safety.inspection_template_x_checkpoint
-      SET
-        sort_order = ?,
-        required = ?
-      WHERE id = ?
-    `, [
-      sort_order,
-      required,
-      req.params.id
-    ]);
+    // Delete removed checkpoints
+    for (const row of existingRows.rows) {
+      if (!checkpoints.filter((checkpoint) => { return checkpoint.checkpoint_id === row.checkpoint_id; }).length > 0) {
+        await runQuery(`
+            DELETE FROM safety.inspection_template_x_checkpoint
+            WHERE id = ?
+          `, [row.id]);
+      }
+    }
+
+    // Insert new checkpoints or update existing ones
+    for (const cp of checkpoints) {
+      const existing = existingRows.rows.filter((checkpoint) => { return checkpoint.checkpoint_id === cp.checkpoint_id; });
+
+      if (existing.length > 0) {
+        await runQuery(`
+          UPDATE safety.inspection_template_x_checkpoint
+          SET
+            sort_order = ?,
+            required = ?
+          WHERE id = ?
+          `, [
+          cp.sort_order,
+          cp.required,
+          existing.id
+        ]);
+      } else {
+        await runQuery(`
+          INSERT INTO safety.inspection_template_x_checkpoint
+          (
+            checkpoint_id,
+            inspection_template_id,
+            sort_order,
+            required
+          ) VALUES (?, ?, ?, ?)
+          `, [
+          cp.checkpoint_id,
+          req.params.id,
+          cp.sort_order,
+          cp.required
+        ]);
+      }
+    }
 
     res.json({ success: true });
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: err.message
+    });
   }
 });
 

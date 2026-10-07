@@ -13,11 +13,12 @@ let checkpointData = [];
 let templateData = [];
 let referenceData = [];
 let templateDetailData = [];
+let templateDetailCheckpoints = [];
 
 const formatDate = (value) => `${(new Date(value)).toLocaleDateString("nl-BE")}`;
 const formatDateInput = (value) => new Date(value);
 
-const maps = {
+let maps = {
   checkbox: {
     0: { text: "\u2610", css: ["unchecked-cell"] },
     1: { text: "\u2611", css: ["checked-cell"] }
@@ -55,9 +56,16 @@ const checkpoint_tbl_cols = [
   }
 ];
 
+const template_checkpoint_tbl_cols = [
+  { field: "description" },
+  { field: "checkpoint_category_id", map: "categories" },
+  { field: "checkpoint_area_id", map: "areas" },
+  { field: "required", map: "checkbox"}
+];
+
 async function loadData() {
   templateData = await callApi("getTemplates");
-  console.log(templateData);
+  //console.log(templateData);
   renderTemplateTable();
 
   checkpointData = await callApi("getCheckpoints");
@@ -66,6 +74,10 @@ async function loadData() {
 
   referenceData = await callApi("getReferenceValues");
   //console.log(referenceData);
+  maps = {...maps, 
+    categories: Object.fromEntries(new Map(referenceData["categories"].map(category => [category.checkpoint_category_id, { text: category.value }]))),
+    areas: Object.fromEntries(new Map(referenceData["areas"].map(area => [area.checkpoint_area_id, { text: area.value }])))
+  }
 }
 
 async function saveData(root) {
@@ -83,9 +95,13 @@ async function saveData(root) {
   };
 
   if (MODE === CREATEMODE) {
-    callApi("createTemplate", { body: bodyContent });
+    const result = await callApi("createTemplate", { body: bodyContent });
+    console.log(bodyContent);
+    console.log(result);
   } else if (MODE === EDITMODE) {
-    callApi("updateTemplate", { params: loadedTemplateId, body: bodyContent });
+    await callApi("updateTemplate", { params: loadedTemplateId, body: bodyContent });
+    const res = await callApi("updateTemplateCheckpoints", {params: loadedTemplateId, body: {checkpoints: templateDetailCheckpoints}});
+    console.log(res);
   }
 
   loadData(root);
@@ -161,6 +177,7 @@ function createTableCell(rowData, column) {
       }
     } catch (e) {
       console.log(e.message);
+      console.log(maps);
       console.log(column);
       console.log(value);
     }
@@ -231,9 +248,27 @@ async function loadDetail(id) {
     document.querySelector("#planned-cb").checked = true;
   }
 
+  renderTemplateCheckpointTable();
+
   loadedTemplateId = id;
   changeMode(VIEWMODE);
 };
+
+function renderTemplateCheckpointTable(){
+  const templateTable = document.querySelector("#template-checkpoint-table");
+  templateTable.innerHTML = "";
+
+  if(templateDetailData.checkpoints){
+    templateDetailData.checkpoints.forEach((cp) => {
+      const row = document.createElement("tr");
+      template_checkpoint_tbl_cols.forEach((column) => {
+        row.appendChild(createTableCell(cp, column));
+      });
+      
+      templateTable.appendChild(row);
+    });
+  }
+}
 
 function clearForm() {
 
@@ -252,6 +287,12 @@ function changeMode(mode) {
   inputForm.querySelector("#save-btn").disabled = (MODE === VIEWMODE);
   inputForm.querySelector("#edit-btn").disabled = (MODE === CREATEMODE || MODE === EDITMODE || (MODE === VIEWMODE && !loadedTemplateId));
   document.querySelector("#new-template-btn").disabled = (MODE === CREATEMODE || MODE === EDITMODE);
+  document.querySelector("#add-checkpoint-btn").disabled = (MODE === VIEWMODE);
+
+  document.querySelector("#planned-cb").style.disabled = (MODE === VIEWMODE);
+  document.querySelector("#planned-cb").style.pointerEvents = MODE === CREATEMODE || MODE === EDITMODE ? 'auto' : 'none';
+  document.querySelector("#planned-cb-lbl").style.pointerEvents = MODE === CREATEMODE || MODE === EDITMODE ? 'auto' : 'none';
+  document.querySelector("#frequency-type-fld").style.pointerEvents = MODE === CREATEMODE || MODE === EDITMODE ? 'auto' : 'none';
 
   renderCheckPointTable();
 }
@@ -356,18 +397,76 @@ async function renderCheckpointInput(id = 0) {
   };
 }
 
-async function renderCheckpointSelectionTable(){
+async function renderCheckpointSelectionTable() {
   const modal = document.querySelector("#modal-root");
   modal.classList.toggle("hidden");
 
   const modalContent = document.querySelector("#modal-content");
 
+  templateDetailCheckpoints = templateDetailData.checkpoints;
+
   modalContent.innerHTML = `
+      <h2 style="margin: 0em;">Selecteer Checkpoints</h2>
+      <div id="checkpoint_modal_list" style="margin: 0.5em; margin-bottom: 1em;">
+      </div>
       <div style="display: flex; flex-direction: row; justify-content: space-between;">
         <button id="save-modal-btn" class="new-btn">Opslaan</button>
         <button id="cancel-modal-btn" class="cancel-btn">Annuleren</button>
       </div>
   `;
+
+  const checkpointList = document.querySelector("#checkpoint_modal_list");
+
+  checkpointData.forEach((checkpoint) => {
+    const div = document.createElement("div");
+    const label = document.createElement("label");
+    const checkbox = document.createElement("input");
+
+    checkbox.type = "checkbox";
+    checkbox.id = `modal_check_${checkpoint.checkpoint_id}`;
+    checkbox.value = checkpoint.checkpoint_id;
+
+    try {
+      if (templateDetailData.checkpoints.filter((cp) => {
+        return cp.checkpoint_id === checkpoint.checkpoint_id;
+      }).length > 0) {
+        checkbox.checked = true;
+      }
+    } catch (err) {
+      console.log(err.message);
+    }
+
+    label.textContent = checkpoint.description;
+    label.htmlFor = checkbox.id;
+
+    checkbox.onchange = () => {
+      if (!checkbox.checked) {
+        templateDetailCheckpoints = templateDetailCheckpoints.filter((cp) => { return cp.checkpoint_id !== checkpoint.checkpoint_id; });
+      } else {
+        templateDetailCheckpoints.push({
+          active: checkpoint.active,
+          checkpoint_area_id: checkpoint.checkpoint_area_id,
+          checkpoint_category_id: checkpoint.checkpoint_category_id,
+          checkpoint_id: checkpoint.checkpoint_id,
+          description: checkpoint.description,
+          remarks: checkpoint.remarks,
+          required: 1,
+          sort_order: 1
+        });
+      }
+    }
+
+    div.appendChild(label);
+    div.appendChild(checkbox);
+    checkpointList.appendChild(div);
+  });
+
+  document.querySelector("#save-modal-btn").onclick = () => {
+    templateDetailData.checkpoints = templateDetailCheckpoints;
+    renderTemplateCheckpointTable();
+    modalContent.innerHTML = "";
+    modal.classList.toggle("hidden");
+  };
 
   document.querySelector("#cancel-modal-btn").onclick = () => {
     modalContent.innerHTML = "";
@@ -435,7 +534,8 @@ export function render(id) {
         </div>
         <h3>Planning & Uitvoering</h3>
         <div>
-          <input id="planned-cb" type="checkbox"/><label for>In automatische planning opnemen</label>
+          <input id="planned-cb" type="checkbox"/>
+          <label id="planned-cb-lbl" for="planned-cb">In automatische planning opnemen</label>
         </div>
         <div id="frequency-input" style="padding-top: 1em;" class="hidden">
           <label style="display: block;">Geplande uitvoeringsfrequentie</label>
@@ -450,7 +550,7 @@ export function render(id) {
         </div>      
         <div style="display: flex; justify-content: space-between; align-items: baseline;">
           <h3>Checkpoints</h3>
-          <button id="add-checkpoint-btn" class="new-btn logo-text-btn">+ Checkpoints toevoegen</button>
+          <button id="add-checkpoint-btn" class="new-btn logo-text-btn">+ Checkpoints wijzigen</button>
         </div>
         <div class="table-container">
           <table>
@@ -458,9 +558,9 @@ export function render(id) {
               <th>Checkpoint</th>
               <th>Categorie</th>
               <th>Location</th>
-              <th class="numeric-column">Actief</th>
+              <th class="numeric-column">Verplicht</th>
             </thead>
-            <tbody>
+            <tbody id="template-checkpoint-table">
               <tr><td>table_content</td><tr>
             </tbody>
           </table>
@@ -511,7 +611,6 @@ export async function init(root, id) {
   };
 
   root.querySelector("#add-checkpoint-btn").onclick = async () => {
-    console.log("show add console modal");
     await renderCheckpointSelectionTable();
   };
 

@@ -320,6 +320,10 @@ tbody tr:last-child td {
 	padding-top: 1em;
 }
 
+input[type=number] {
+	width: 3em;
+}
+
 .bold-red-txt {
 	color: red;
 	font-weight: 600;

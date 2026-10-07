@@ -21,6 +21,7 @@ const endpoints = {
   getTemplatesFull: { url: `/safety/inspection-templates`, method: 'GET' },
   createTemplate: { url: `/safety/inspection-templates`, method: 'POST'},
   updateTemplate: {url: (id) => `/safety/inspection-templates/${id}`, method: 'PUT'},
+  updateTemplateCheckpoints: {url: (id) => `/safety/inspection-templates/${id}/checkpoints`, method: 'PUT'},
   updateTemplateActive: { url: (id) => `/safety/inspection-template/active/${id}`, method: 'PUT' },
   createInspection: { url: `/safety/inspections`, method: 'POST'},
   getReferenceValues: { url: `/safety/reference-values`, method: 'GET'},
