@@ -24,7 +24,8 @@ CREATE TABLE master_data.customer (
 CREATE TABLE master_data.customer_address (
 	id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	customer_id bigint NOT NULL,
-	address_id bigint NOT NULL
+	address_id bigint NOT NULL,
+	address_type_id bigint NOT NULL,
 );
 
 CREATE TABLE master_data.address (
@@ -40,6 +41,12 @@ CREATE TABLE master_data.postal_location (
 	postal_code text NOT NULL,
 	city text NOT NULL,
 	country text NOT NULL
+);
+
+CREATE TABLE master_data.address_type (
+	/* BILLING, DELIVERY, HEADQUARTERS */
+	id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	code bigint NOT NULL
 );
 
 

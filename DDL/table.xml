@@ -1,0 +1,34 @@
+<shape w="160" h="120" aspect="variable" strokewidth="1">
+  <foreground>
+    <!-- Outer rectangle -->
+    <path>
+      <move x="0" y="0"/>
+      <line x="160" y="0"/>
+      <line x="160" y="120"/>
+      <line x="0" y="120"/>
+      <close/>
+    </path>
+
+    <!-- Header line -->
+    <path>
+      <move x="0" y="30"/>
+      <line x="160" y="30"/>
+    </path>
+
+    <!-- Row lines -->
+    <path>
+      <move x="0" y="60"/>
+      <line x="160" y="60"/>
+      <move x="0" y="90"/>
+      <line x="160" y="90"/>
+    </path>
+
+    <!-- Extra column lines (only below header) -->
+    <path>
+      <move x="120" y="30"/>
+      <line x="120" y="120"/>
+    </path>
+
+    <stroke/>
+  </foreground>
+</shape>
